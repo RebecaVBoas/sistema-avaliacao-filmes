@@ -1,6 +1,6 @@
 # 🎬 Sistema de Avaliação de Filmes
 
-Projeto final da disciplina **Linguagem de Programação I** – IFBA  
+Projeto final da disciplina **Linguagem de Programação I** – UNEB  
 Professora: **Maria Inés Restovic**  
 Período: **2025.2**
 
