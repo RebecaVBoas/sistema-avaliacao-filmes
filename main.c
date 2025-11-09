@@ -83,6 +83,48 @@ FILE *abrirAvaliacoes(){
         return avaliacoes;
     }
 }
+
+void cadastrarFilme(FILE *arqfilme){
+
+    Filmes filme;
+
+    printf("\n----------------CADASTRANDO NOVO FILME----------------\n");
+
+    printf("\nInforme o título do filme: \n");
+    fgets(filme.titulo, sizeof(filme.titulo), stdin);
+
+    printf("\nAdcione o resumo: \n");
+    fgets(filme.resumo, sizeof(filme.resumo), stdin);
+
+    /*PENDENTE: IMPLEMENTAR NAS FUNÇÕES ENVOLVIDAS O CÁLCULO DESSES 
+    VALORES AUTOMATICAMENTE */
+
+    filme.avaliacao_media = 0;
+
+    filme.qtdAvalia = 0;
+
+    filme.qtdComent = 0;
+
+    fwrite(&filme, sizeof(filme), 1, arqfilme);
+    printf("\nFilme cadastrado com sucesso!\n");
+}
+
+void cadastrarUsuario(FILE *arqusuario){
+
+    Usuarios user;
+
+    printf("\n----------------CADASTRANDO NOVO USUARIO----------------\n");
+
+    printf("\nLogin:\n");
+    fgets(user.nome,sizeof(user.nome),stdin);
+
+    printf("\nSenha:\n");
+    fgets(user.senha,sizeof(user.senha),stdin);
+
+    fwrite(&user,sizeof(user),1,arqusuario);
+    printf("\nUsuario cadastrado com sucesso!\n");
+
+}
  
 
 
@@ -92,6 +134,10 @@ int main()
     FILE *filme = abrirFilme();
     FILE *usuarios = abrirUsuarios();
     FILE *avaliacoes= abrirAvaliacoes();
+
+    //TESTE 
+    
+    
     Usuarios login;
     /*
         declarações das variaveis
