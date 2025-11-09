@@ -29,8 +29,34 @@ typedef struct
 
 } usuarios;
 
+void menuPrincipal()
+{
+    system("clear"); // utilizar cls no windows
+    // 28 espaços
+    printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------           \n");
+    printf("                            1 - Ver filmes                     \n");
+    printf("                            2 - Estastísticas                  \n");
+    printf("                            3 - ADM                            \n");
+    printf("                            4 - Sair                           \n");
+}
+
 int main()
 {
+    usuarios login;
+    /*
+        declarações das variaveis
+    */
+
+    printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------           \n");
+    printf("                            Faça seu login:                     \n");
+    printf("                            Login: ");
+    fgets(login.nome, sizeof(login.nome), stdin);
+    printf("                            Senha: ");
+    fgets(login.senha, sizeof(login.senha), stdin);
+
+    // incluir validações de usuario antes de ir para o menu principal
+
+    menuPrincipal();
 
     return 0;
 }
