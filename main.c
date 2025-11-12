@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*-------------------MODULO DE FUNÇÕES DEFINIÇÃO DAS STRUCTS-------------------*/
+
 typedef struct
 {
     char titulo[100];
@@ -29,6 +31,73 @@ typedef struct
 
 } Usuarios;
 
+/*------------------- MÓDULO DE LISTAGEM DAS FUNÇÕES -------------------*/
+
+// Funções de Abertura de Arquivo
+FILE *abrirFilme();
+FILE *abrirUsuarios();
+FILE *abrirAvaliacoes();
+
+// Funções do Menu
+void menuPrincipal();
+
+// Funções de Filmes
+void cadastrarFilme(FILE *arqfilme);
+
+// Funções de Usuários
+void cadastrarUsuario(FILE *arqusuario);
+void validarLogin(FILE *arqusuario);
+void atualizarSenha(FILE *arqusuario, Usuarios user);
+void imprimirUsuarios(FILE *arqusuario);
+
+// Funções Utilitárias
+void remover_quebra_linha(char *str);
+
+
+int main()
+{
+
+    FILE *filme = abrirFilme();
+    FILE *usuarios = abrirUsuarios();
+    FILE *avaliacoes = abrirAvaliacoes();
+
+    // TESTE
+    
+   
+    cadastrarUsuario(usuarios);
+    validarLogin(usuarios);
+    imprimirUsuarios(usuarios);
+
+    /*
+        declarações das variaveis
+    */
+   
+    // CADASTRAR 20 FILMES
+    //  int i = 0;
+    //  while (i < 20)
+    //  {
+    //      cadastrarFilme(filme);
+    //      i++;
+    //  }
+
+    // incluir validações de usuario antes de ir para o menu principal
+
+    //menuPrincipal();
+    //cadastrarUsuario(usuarios);
+ 
+    //atualizarSenha();
+
+    // fechando arquivos para salvar
+    printf("\nEncerrando e fechando arquivos...\n");
+    fclose(filme);
+    fclose(usuarios);
+    fclose(avaliacoes);
+    printf("Arquivos fechados. Ate mais!\n");
+
+
+    return 0;
+}
+
 void menuPrincipal()
 {
     system("clear"); // utilizar cls no windows
@@ -40,28 +109,8 @@ void menuPrincipal()
     printf("                            4 - Sair                           \n");
 }
 
-// Remove o '\n' do final de uma string
-void remover_quebra_linha(char *str)
-{
-    int i = 0;
 
-    // Avança até o final da string
-    // O loop para quando str[i] for o '\0' (terminador)
-    while (str[i] != '\0')
-    {
-        i++;
-    }
-
-    /* agora, 'i' é o índice do '\0' (que é o comprimento da string)
-    verifica se a string não está vazia (i > 0) e se o caractere ANTERIOR (i - 1) é o '\n'
-    */
-    if (i > 0 && str[i - 1] == '\n')
-    {
-
-        // se for, substitui o '\n' por um '\0', "cortando" a string um caractere antes
-        str[i - 1] = '\0';
-    }
-}
+/*-------------------MODULO DE FUNÇÕES DE ABERTURA DOS ARQUIVOS-------------------*/
 
 FILE *abrirFilme()
 {
@@ -115,6 +164,9 @@ FILE *abrirAvaliacoes()
     }
 }
 
+/*-------------------MODULO DE FUNÇÕES DE FILMES-------------------*/
+
+
 void cadastrarFilme(FILE *arqfilme)
 {
 
@@ -143,6 +195,9 @@ void cadastrarFilme(FILE *arqfilme)
     printf("\nFilme cadastrado com sucesso!\n");
 }
 
+
+/*-------------------MODULO DE FUNÇÕES DE USUARIOS-------------------*/
+
 void cadastrarUsuario(FILE *arqusuario)
 {
 
@@ -157,43 +212,117 @@ void cadastrarUsuario(FILE *arqusuario)
     printf("\nSenha:\n");
     fgets(user.senha, sizeof(user.senha), stdin);
     remover_quebra_linha(user.senha);
+    
 
     fwrite(&user, sizeof(user), 1, arqusuario);
     printf("\nUsuario cadastrado com sucesso!\n");
 }
 
-int main()
-{
+void validarLogin(FILE *arqusuario){
 
-    FILE *filme = abrirFilme();
-    FILE *usuarios = abrirUsuarios();
-    FILE *avaliacoes = abrirAvaliacoes();
-
-    // TESTE
-
+    Usuarios arquser;
     Usuarios login;
-    /*
-        declarações das variaveis
+
+    printf("\n--------------LOGIN--------------\n");
+
+    printf("LOGIN:");
+    fgets(login.nome, sizeof(login.nome), stdin);
+    remover_quebra_linha(login.nome);
+
+    printf("\nSENHA:");
+    fgets(login.senha, sizeof(login.senha), stdin);
+    remover_quebra_linha(login.senha);
+
+    
+    while(fread(&arquser, sizeof(arquser), 1, arqusuario)==1){
+        if( (strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0)){
+            if(arquser.nome != "admin"){
+                //IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
+                printf("VALIDADO COMUM");
+                break;
+            }
+            else{
+                //IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
+                printf("VALIDADO ADMIN");
+                break;
+            }
+        }
+        else{
+            printf("\nUsuario não encontrado\n");
+        }
+    }
+}
+
+void atualizarSenha(FILE *arqusuario, Usuarios user){
+
+    Usuarios arqUser;
+
+    for(;;){
+        fread(&arqUser, sizeof(arqUser), 1, arqusuario);
+
+            if(strcmp(arqUser.nome, user.nome) == 0){
+                printf("Informe a nova senha");
+                fgets(arqUser.senha, sizeof(arqUser.senha), stdin);
+                remover_quebra_linha(arqUser.senha);
+                fseek(arqusuario, -sizeof(arqUser), SEEK_CUR);
+                fwrite(&arqUser, sizeof(arqUser), 1, arqusuario);
+                break;
+            }
+
+            //Verificar primeiro
+            if(feof(arqusuario))
+                break;
+    }
+ }
+
+
+
+
+/* NOVA FUNÇÃO: LÊ TODOS OS USUÁRIOS DO ARQUIVO E IMPRIME */
+void imprimirUsuarios(FILE *arqusuario)
+{
+    Usuarios user;
+    int contador = 0;
+
+    // volta o ponteiro do arquivo para o início
+    rewind(arqusuario);
+
+    printf("\n---------- LISTA DE USUÁRIOS CADASTRADOS ----------\n");
+
+    while (fread(&user, sizeof(user), 1, arqusuario))
+    {
+        printf("Usuário %d:\n", ++contador);
+        printf("   Nome:  %s\n", user.nome);
+        printf("   Senha: %s\n\n", user.senha);
+    }
+
+    if (contador == 0)
+        printf("Nenhum usuário cadastrado ainda.\n");
+}
+
+/*-------------------MODULO DE FUNÇÕES DE AVALIAÇÕES-------------------*/
+
+/*-------------------MODULO DE FUNÇÕES GÊNERICAS-------------------*/
+
+// Remove o '\n' do final de uma string
+void remover_quebra_linha(char *str)
+{
+    int i = 0;
+
+    // Avança até o final da string
+    // O loop para quando str[i] for o '\0' (terminador)
+    while (str[i] != '\0')
+    {
+        i++;
+    }
+
+    /* agora, 'i' é o índice do '\0' (que é o comprimento da string)
+    verifica se a string não está vazia (i > 0) e se o caractere ANTERIOR (i - 1) é o '\n'
     */
-   
-    // CADASTRAR 20 FILMES
-    //  int i = 0;
-    //  while (i < 20)
-    //  {
-    //      cadastrarFilme(filme);
-    //      i++;
-    //  }
+    if (i > 0 && str[i - 1] == '\n')
+    {
 
-    // incluir validações de usuario antes de ir para o menu principal
-
-    menuPrincipal();
-
-    // fechando arquivos para salvar
-    printf("\nEncerrando e fechando arquivos...\n");
-    fclose(filme);
-    fclose(usuarios);
-    fclose(avaliacoes);
-    printf("Arquivos fechados. Ate mais!\n");
-
-    return 0;
+        // se for, substitui o '\n' por um '\0', "cortando" a string um caractere antes
+        str[i - 1] = '\0';
+    }
 }
