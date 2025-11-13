@@ -34,15 +34,17 @@ typedef struct
 /*------------------- MÓDULO DE LISTAGEM DAS FUNÇÕES -------------------*/
 
 // Funções de Abertura de Arquivo
+// MODIFICAR TIPO DO ARQUIVO E PARAMETRO DO fopen()
 FILE *abrirFilme();
 FILE *abrirUsuarios();
 FILE *abrirAvaliacoes();
 
 // Funções do Menu
-void menuPrincipal();
+int menuPrincipal(int *op);
 
 // Funções de Filmes
 void cadastrarFilme(FILE *arqfilme);
+void listarFilmes(FILE *arqfilme);
 
 // Funções de Usuários
 void cadastrarUsuario(FILE *arqusuario);
@@ -53,7 +55,6 @@ void imprimirUsuarios(FILE *arqusuario);
 // Funções Utilitárias
 void remover_quebra_linha(char *str);
 
-
 int main()
 {
 
@@ -61,17 +62,14 @@ int main()
     FILE *usuarios = abrirUsuarios();
     FILE *avaliacoes = abrirAvaliacoes();
 
-    // TESTE
-    
-   
+    /* TESTE
+
     cadastrarUsuario(usuarios);
     validarLogin(usuarios);
     imprimirUsuarios(usuarios);
-
-    /*
-        declarações das variaveis
     */
-   
+
+    /* Chamando função para cadastro dos filmes*/
     // CADASTRAR 20 FILMES
     //  int i = 0;
     //  while (i < 20)
@@ -82,33 +80,65 @@ int main()
 
     // incluir validações de usuario antes de ir para o menu principal
 
-    //menuPrincipal();
-    //cadastrarUsuario(usuarios);
- 
-    //atualizarSenha();
+    int op = 0;
+    while (op != 4)
+    {
+        menuPrincipal(&op);
+        // limpa o buffer para a próxima leitura
+        while ((getchar()) != '\n')
+            ;
 
-    // fechando arquivos para salvar
-    printf("\nEncerrando e fechando arquivos...\n");
-    fclose(filme);
-    fclose(usuarios);
-    fclose(avaliacoes);
-    printf("Arquivos fechados. Ate mais!\n");
+        switch (op)
+        {
+        case 1:
+            cadastrarFilme(filme);
+            system("clear");
+            listarFilmes(filme);
 
+            break;
+        case 2:
+            /* 2 - Estastísticas */
+            break;
+        case 3:
+
+            /* 3 - ADM */
+
+            break;
+        case 4: // saiu
+            system("clear");
+            // fechando arquivos para salvar
+            printf("\nEncerrando e fechando arquivos...\n");
+            fclose(filme);
+            fclose(usuarios);
+            fclose(avaliacoes);
+            printf("Arquivos fechados. Ate mais!\n");
+            printf("Saindo do programa...\n");
+            exit(0);
+            break;
+
+        default:
+            printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 4!! \n \n");
+            break;
+        }
+    }
 
     return 0;
 }
 
-void menuPrincipal()
+int menuPrincipal(int *op)
 {
-    system("clear"); // utilizar cls no windows
-    // 28 espaços
+    // system("clear"); utilizar cls no windows
+    //  28 espaços
+
     printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------           \n");
     printf("                            1 - Ver filmes                     \n");
     printf("                            2 - Estastísticas                  \n");
     printf("                            3 - ADM                            \n");
     printf("                            4 - Sair                           \n");
+    printf("                            Escolha sua opção: ");
+    scanf("%d", op);
+    return *op;
 }
-
 
 /*-------------------MODULO DE FUNÇÕES DE ABERTURA DOS ARQUIVOS-------------------*/
 
@@ -166,7 +196,6 @@ FILE *abrirAvaliacoes()
 
 /*-------------------MODULO DE FUNÇÕES DE FILMES-------------------*/
 
-
 void cadastrarFilme(FILE *arqfilme)
 {
 
@@ -195,6 +224,34 @@ void cadastrarFilme(FILE *arqfilme)
     printf("\nFilme cadastrado com sucesso!\n");
 }
 
+void listarFilmes(FILE *arqfilme)
+{
+
+    Filmes filme;
+
+    if (arqfilme == NULL)
+    {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+    // antes de ler os filmes, mova o ponteiro de leitura para o início do arquivo
+    fseek(arqfilme, 0, SEEK_SET);
+
+    printf("\n                 ---------- FILMES CADASTRADOS ----------\n");
+
+    // Lê os filmes do arquivo enquanto não atingir o final
+    while (fread(&filme, sizeof(filme), 1, arqfilme) == 1)
+    {
+        printf("                            Título: %s\n", filme.titulo);
+        printf("                            Resumo: %s\n", filme.resumo);
+        printf("----------------------------------------------------------------------------------------------\n");
+    }
+
+    if (ferror(arqfilme))
+    {
+        printf("Erro ao ler o arquivo.\n");
+    }
+}
 
 /*-------------------MODULO DE FUNÇÕES DE USUARIOS-------------------*/
 
@@ -212,13 +269,13 @@ void cadastrarUsuario(FILE *arqusuario)
     printf("\nSenha:\n");
     fgets(user.senha, sizeof(user.senha), stdin);
     remover_quebra_linha(user.senha);
-    
 
     fwrite(&user, sizeof(user), 1, arqusuario);
     printf("\nUsuario cadastrado com sucesso!\n");
 }
 
-void validarLogin(FILE *arqusuario){
+void validarLogin(FILE *arqusuario)
+{
 
     Usuarios arquser;
     Usuarios login;
@@ -233,50 +290,54 @@ void validarLogin(FILE *arqusuario){
     fgets(login.senha, sizeof(login.senha), stdin);
     remover_quebra_linha(login.senha);
 
-    
-    while(fread(&arquser, sizeof(arquser), 1, arqusuario)==1){
-        if( (strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0)){
-            if(arquser.nome != "admin"){
-                //IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
+    while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
+    {
+        if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
+        {
+            if (arquser.nome != "admin")
+            {
+                // IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
                 printf("VALIDADO COMUM");
                 break;
             }
-            else{
-                //IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
+            else
+            {
+                // IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
                 printf("VALIDADO ADMIN");
                 break;
             }
         }
-        else{
+        else
+        {
             printf("\nUsuario não encontrado\n");
         }
     }
 }
 
-void atualizarSenha(FILE *arqusuario, Usuarios user){
+void atualizarSenha(FILE *arqusuario, Usuarios user)
+{
 
     Usuarios arqUser;
 
-    for(;;){
+    for (;;)
+    {
         fread(&arqUser, sizeof(arqUser), 1, arqusuario);
 
-            if(strcmp(arqUser.nome, user.nome) == 0){
-                printf("Informe a nova senha");
-                fgets(arqUser.senha, sizeof(arqUser.senha), stdin);
-                remover_quebra_linha(arqUser.senha);
-                fseek(arqusuario, -sizeof(arqUser), SEEK_CUR);
-                fwrite(&arqUser, sizeof(arqUser), 1, arqusuario);
-                break;
-            }
+        if (strcmp(arqUser.nome, user.nome) == 0)
+        {
+            printf("Informe a nova senha");
+            fgets(arqUser.senha, sizeof(arqUser.senha), stdin);
+            remover_quebra_linha(arqUser.senha);
+            fseek(arqusuario, -sizeof(arqUser), SEEK_CUR);
+            fwrite(&arqUser, sizeof(arqUser), 1, arqusuario);
+            break;
+        }
 
-            //Verificar primeiro
-            if(feof(arqusuario))
-                break;
+        // Verificar primeiro
+        if (feof(arqusuario))
+            break;
     }
- }
-
-
-
+}
 
 /* NOVA FUNÇÃO: LÊ TODOS OS USUÁRIOS DO ARQUIVO E IMPRIME */
 void imprimirUsuarios(FILE *arqusuario)
