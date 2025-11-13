@@ -62,14 +62,14 @@ int main()
     FILE *usuarios = abrirUsuarios();
     FILE *avaliacoes = abrirAvaliacoes();
 
-    /* TESTE
-
+    // TESTE
+    
+   
     cadastrarUsuario(usuarios);
     validarLogin(usuarios);
     imprimirUsuarios(usuarios);
     */
-
-    /* Chamando função para cadastro dos filmes*/
+   
     // CADASTRAR 20 FILMES
     //  int i = 0;
     //  while (i < 20)
@@ -80,6 +80,17 @@ int main()
 
     // incluir validações de usuario antes de ir para o menu principal
 
+    // menuPrincipal();
+    // cadastrarUsuario(usuarios);
+
+    // atualizarSenha();
+
+    // fechando arquivos para salvar
+    printf("\nEncerrando e fechando arquivos...\n");
+    fclose(filme);
+    fclose(usuarios);
+    fclose(avaliacoes);
+    printf("Arquivos fechados. Ate mais!\n");
     int op = 0;
     while (op != 4)
     {
@@ -146,52 +157,60 @@ FILE *abrirFilme()
 {
     FILE *filmes;
 
-    filmes = fopen("filmes.data", "a+b");
+    filmes = fopen("filmes.dat", "r+b");
 
     if (filmes == NULL)
     {
-        printf("ERRO, NÃO FOI POSÍVEL ABRIR O ARQUIVO FILMES");
-        return NULL;
+        filmes = fopen("filmes.dat", "w+b");
+
+        if (filmes == NULL)
+        {
+            printf("ERRO, NÃO FOI POSÍVEL ABRIR O ARQUIVO FILMES");
+            return NULL;
+        }
     }
-    else
-    {
-        printf("\nARQUIVO FILME ABERTO \n");
-        return filmes;
-    }
+
+    printf("\nARQUIVO FILME ABERTO \n");
+    return filmes;
 }
 
 FILE *abrirUsuarios()
 {
     FILE *usuarios;
 
-    usuarios = fopen("usuarios.data", "a+b");
+    usuarios = fopen("usuarios.dat", "r+b");
     if (usuarios == NULL)
     {
-        printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO USUARIOS.DATA \n");
-        return NULL;
+        usuarios = fopen("usuarios.dat", "w+b");
+
+        if (usuarios == NULL)
+        {
+            printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO USUARIOS.DATA \n");
+            return NULL;
+        }
     }
-    else
-    {
-        printf("\nARQUIVO USUARIOS.DATA ABERTO\n");
-        return usuarios;
-    }
+
+    printf("\nARQUIVO USUARIOS.DATA ABERTO\n");
+    return usuarios;
 }
 
 FILE *abrirAvaliacoes()
 {
     FILE *avaliacoes;
-    avaliacoes = fopen("avaliacoes.data", "a+b");
+    avaliacoes = fopen("avaliacoes.dat", "r+w");
 
-    if (avaliacoes == NULL)
     {
-        printf("\nERRO. NÃO FOI POSSIVEL ABRIRO ARQUIVO AVALIACOES.DATA\n");
-        return NULL;
+        avaliacoes = fopen("avaliacoes .dat", "w+b");
+
+        if (avaliacoes == NULL)
+        {
+            printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO USUARIOS.DATA \n");
+            return NULL;
+        }
     }
-    else
-    {
-        printf("\nARQUIVO AVALIACOES.DATA ABERTO\n");
-        return avaliacoes;
-    }
+
+    printf("\nARQUIVO USUARIOS.DATA ABERTO\n");
+    return avaliacoes;
 }
 
 /*-------------------MODULO DE FUNÇÕES DE FILMES-------------------*/
@@ -223,7 +242,6 @@ void cadastrarFilme(FILE *arqfilme)
     fwrite(&filme, sizeof(filme), 1, arqfilme);
     printf("\nFilme cadastrado com sucesso!\n");
 }
-
 void listarFilmes(FILE *arqfilme)
 {
 
@@ -269,6 +287,7 @@ void cadastrarUsuario(FILE *arqusuario)
     printf("\nSenha:\n");
     fgets(user.senha, sizeof(user.senha), stdin);
     remover_quebra_linha(user.senha);
+    
 
     fwrite(&user, sizeof(user), 1, arqusuario);
     printf("\nUsuario cadastrado com sucesso!\n");
@@ -290,28 +309,26 @@ void validarLogin(FILE *arqusuario)
     fgets(login.senha, sizeof(login.senha), stdin);
     remover_quebra_linha(login.senha);
 
-    while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
-    {
-        if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
-        {
-            if (arquser.nome != "admin")
-            {
-                // IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
+    
+    while(fread(&arquser, sizeof(arquser), 1, arqusuario)==1){
+        if( (strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0)){
+            if(arquser.nome != "admin"){
+                //IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
                 printf("VALIDADO COMUM");
-                break;
+                return;
             }
-            else
-            {
-                // IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
+            else{
+                //IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
                 printf("VALIDADO ADMIN");
-                break;
+                return;
             }
         }
-        else
-        {
+        else{
             printf("\nUsuario não encontrado\n");
         }
     }
+
+    printf("\nUsuario não encontrado\n");
 }
 
 void atualizarSenha(FILE *arqusuario, Usuarios user)
