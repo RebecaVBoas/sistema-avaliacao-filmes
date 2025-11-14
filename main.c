@@ -2,6 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ORANGE "\033[38;5;208m"
+#define GREEN "\033[38;5;41m"
+#define BLUE "\033[38;5;75m"
+#define RESET "\033[0m"
+
+/* modo de uso
+    printf(ORANGE "Cor 1 (#ff8000)\n" RESET);
+    printf(GREEN  "Cor 2 (#00e054)\n" RESET);
+    printf(BLUE   "Cor 3 (#40bcf4)\n" RESET);
+    return 0;
+*/
+
 /*-------------------MODULO DE FUNÇÕES DEFINIÇÃO DAS STRUCTS-------------------*/
 
 typedef struct
@@ -63,34 +75,28 @@ int main()
     FILE *avaliacoes = abrirAvaliacoes();
 
     // TESTE
-    
-   
-    cadastrarUsuario(usuarios);
-    validarLogin(usuarios);
-    imprimirUsuarios(usuarios);
-    */
-   
-    // CADASTRAR 20 FILMES
-    //  int i = 0;
-    //  while (i < 20)
-    //  {
-    //      cadastrarFilme(filme);
-    //      i++;
-    //  }
 
-    // incluir validações de usuario antes de ir para o menu principal
-
-    // menuPrincipal();
     // cadastrarUsuario(usuarios);
+    // validarLogin(usuarios);
+    // imprimirUsuarios(usuarios);
 
-    // atualizarSenha();
+    /*
+    CADASTRAR 20 FILMES
+     int i = 0;
+     while (i < 20)
+     {
+         cadastrarFilme(filme);
+         i++;
+     }
 
-    // fechando arquivos para salvar
-    printf("\nEncerrando e fechando arquivos...\n");
-    fclose(filme);
-    fclose(usuarios);
-    fclose(avaliacoes);
-    printf("Arquivos fechados. Ate mais!\n");
+    incluir validações de usuario antes de ir para o menu principal
+
+    menuPrincipal();
+    cadastrarUsuario(usuarios);
+
+    atualizarSenha();
+    */
+
     int op = 0;
     while (op != 4)
     {
@@ -102,7 +108,7 @@ int main()
         switch (op)
         {
         case 1:
-            cadastrarFilme(filme);
+            // cadastrarFilme(filme);
             system("clear");
             listarFilmes(filme);
 
@@ -139,8 +145,13 @@ int main()
 int menuPrincipal(int *op)
 {
     // system("clear"); utilizar cls no windows
-    //  28 espaços
 
+    // 38 espaços
+    printf(ORANGE "                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
+    printf(GREEN "⬤ " RESET);
+    printf(BLUE "⬤ " RESET "\n");
+
+    //  28 espaços
     printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------           \n");
     printf("                            1 - Ver filmes                     \n");
     printf("                            2 - Estastísticas                  \n");
@@ -219,14 +230,20 @@ void cadastrarFilme(FILE *arqfilme)
 {
 
     Filmes filme;
+    fseek(arqfilme, 0, SEEK_END);
 
-    printf("\n----------------CADASTRANDO NOVO FILME----------------\n");
+    /* ⬤ é Unicode, que é um padrão universal que define números (códigos)
+    para representar todos os caracteres que existem */
+    printf(ORANGE "                                     ⬤ " RESET);
+    printf(GREEN "⬤ " RESET);
+    printf(BLUE "⬤ " RESET "\n");
+    printf("\n                 ---------- CADASTRANDO NOVO FILME ----------           \n");
 
-    printf("\nInforme o título do filme: \n");
+    printf("\n                            Informe o título do filme: ");
     fgets(filme.titulo, sizeof(filme.titulo), stdin);
     remover_quebra_linha(filme.titulo);
 
-    printf("\nAdcione o resumo: \n");
+    printf("\n                            Adcione o resumo: ");
     fgets(filme.resumo, sizeof(filme.resumo), stdin);
     remover_quebra_linha(filme.resumo);
 
@@ -255,14 +272,17 @@ void listarFilmes(FILE *arqfilme)
     // antes de ler os filmes, mova o ponteiro de leitura para o início do arquivo
     fseek(arqfilme, 0, SEEK_SET);
 
-    printf("\n                 ---------- FILMES CADASTRADOS ----------\n");
+    printf(ORANGE "                                     ⬤ " RESET);
+    printf(GREEN "⬤ " RESET);
+    printf(BLUE "⬤ " RESET "\n");
+    printf("\n                    ---------- FILMES CADASTRADOS ----------           \n");
 
     // Lê os filmes do arquivo enquanto não atingir o final
     while (fread(&filme, sizeof(filme), 1, arqfilme) == 1)
     {
-        printf("                            Título: %s\n", filme.titulo);
-        printf("                            Resumo: %s\n", filme.resumo);
-        printf("----------------------------------------------------------------------------------------------\n");
+        printf("\n                               Título: %s\n", filme.titulo);
+        printf("                               Resumo: %s\n", filme.resumo);
+        printf("                    ----------------------------------------\n");
     }
 
     if (ferror(arqfilme))
@@ -278,19 +298,18 @@ void cadastrarUsuario(FILE *arqusuario)
 
     Usuarios user;
 
-    printf("\n----------------CADASTRANDO NOVO USUARIO----------------\n");
+    printf("\n                 ---------- CADASTRANDO NOVO USUARIO ----------           \n");
 
-    printf("\nLogin:\n");
+    printf("\n                            Login: ");
     fgets(user.nome, sizeof(user.nome), stdin);
     remover_quebra_linha(user.nome);
 
-    printf("\nSenha:\n");
+    printf("\n                            Senha: ");
     fgets(user.senha, sizeof(user.senha), stdin);
     remover_quebra_linha(user.senha);
-    
 
     fwrite(&user, sizeof(user), 1, arqusuario);
-    printf("\nUsuario cadastrado com sucesso!\n");
+    printf("\n                            Usuario cadastrado com sucesso!                            \n");
 }
 
 void validarLogin(FILE *arqusuario)
@@ -299,31 +318,35 @@ void validarLogin(FILE *arqusuario)
     Usuarios arquser;
     Usuarios login;
 
-    printf("\n--------------LOGIN--------------\n");
+    printf("\n                 ---------- LOGIN ----------           \n");
 
-    printf("LOGIN:");
+    printf("                            LOGIN: ");
     fgets(login.nome, sizeof(login.nome), stdin);
     remover_quebra_linha(login.nome);
 
-    printf("\nSENHA:");
+    printf("\n                            SENHA: ");
     fgets(login.senha, sizeof(login.senha), stdin);
     remover_quebra_linha(login.senha);
 
-    
-    while(fread(&arquser, sizeof(arquser), 1, arqusuario)==1){
-        if( (strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0)){
-            if(arquser.nome != "admin"){
-                //IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
+    while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
+    {
+        if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
+        {
+            if (arquser.nome != "admin")
+            {
+                // IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
                 printf("VALIDADO COMUM");
                 return;
             }
-            else{
-                //IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
+            else
+            {
+                // IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
                 printf("VALIDADO ADMIN");
                 return;
             }
         }
-        else{
+        else
+        {
             printf("\nUsuario não encontrado\n");
         }
     }
