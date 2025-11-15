@@ -74,12 +74,7 @@ int main()
     FILE *usuarios = abrirUsuarios();
     FILE *avaliacoes = abrirAvaliacoes();
 
-    // TESTE
-
-    // cadastrarUsuario(usuarios);
-    // validarLogin(usuarios);
-    // imprimirUsuarios(usuarios);
-
+    
     /*
     CADASTRAR 20 FILMES
      int i = 0;
@@ -97,6 +92,10 @@ int main()
     atualizarSenha();
     */
 
+    imprimirUsuarios(usuarios);
+    cadastrarUsuario(usuarios);
+
+    
     int op = 0;
     while (op != 4)
     {
@@ -137,6 +136,7 @@ int main()
             printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 4!! \n \n");
             break;
         }
+        
     }
 
     return 0;
@@ -296,7 +296,7 @@ void listarFilmes(FILE *arqfilme)
 void cadastrarUsuario(FILE *arqusuario)
 {
 
-    Usuarios user;
+    Usuarios user, arquser;
 
     printf("\n                 ---------- CADASTRANDO NOVO USUARIO ----------           \n");
 
@@ -308,6 +308,17 @@ void cadastrarUsuario(FILE *arqusuario)
     fgets(user.senha, sizeof(user.senha), stdin);
     remover_quebra_linha(user.senha);
 
+
+    fseek(arqusuario, 0, SEEK_SET);
+
+    while(fread(&arquser, sizeof(arquser), 1, arqusuario) == 1){
+        if(strcmp(arquser.nome, user.nome) == 0){
+        printf("\n                            nome indisponivel!                            \n");
+            return;
+        }
+    }
+
+    fseek(arqusuario, 0, SEEK_END);
     fwrite(&user, sizeof(user), 1, arqusuario);
     printf("\n                            Usuario cadastrado com sucesso!                            \n");
 }
