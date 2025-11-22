@@ -53,6 +53,7 @@ FILE *abrirAvaliacoes();
 
 // Funções do Menu
 int menuPrincipal(int *op);
+int menuAdmin(int *op);
 
 // Funções de Filmes
 void cadastrarFilme(FILE *arqfilme);
@@ -202,7 +203,7 @@ int menuPrincipal(int *op)
     return *op;
 }
 
-void menuAdmin(int *op){
+int menuAdmin(int *op){
       // system("clear"); utilizar cls no windows
 
     // 38 espaços
