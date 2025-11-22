@@ -60,7 +60,7 @@ void listarFilmes(FILE *arqfilme);
 
 // Funções de Usuários
 void cadastrarUsuario(FILE *arqusuario);
-void validarLogin(FILE *arqusuario);
+Usuarios validarLogin(FILE *arqusuario);
 void atualizarSenha(FILE *arqusuario, Usuarios user);
 void imprimirUsuarios(FILE *arqusuario);
 
@@ -74,7 +74,6 @@ int main()
     FILE *usuarios = abrirUsuarios();
     FILE *avaliacoes = abrirAvaliacoes();
 
-    
     /*
     CADASTRAR 20 FILMES
      int i = 0;
@@ -86,57 +85,95 @@ int main()
 
     incluir validações de usuario antes de ir para o menu principal
 
-    menuPrincipal();
-    cadastrarUsuario(usuarios);
-
-    atualizarSenha();
     */
+   
 
-    imprimirUsuarios(usuarios);
-    cadastrarUsuario(usuarios);
-
-    
+    Usuarios usuerLogado = validarLogin(usuarios);
     int op = 0;
-    while (op != 4)
+
+    if (strcmp(usuerLogado.nome, "admin") != 0)
     {
-        menuPrincipal(&op);
-        // limpa o buffer para a próxima leitura
-        while ((getchar()) != '\n')
-            ;
+        // menuAdmin;
 
-        switch (op)
+        while (op != 7)
         {
-        case 1:
-            // cadastrarFilme(filme);
-            system("clear");
-            listarFilmes(filme);
+            menuPrincipal(&op);
+            // limpa o buffer para a próxima leitura
+            while ((getchar()) != '\n')
+                ;
 
-            break;
-        case 2:
-            /* 2 - Estastísticas */
-            break;
-        case 3:
+            switch (op)
+            {
+            case 1:
+                // cadastrarFilme(filme);
+                system("clear");
+                listarFilmes(filme);
 
-            /* 3 - ADM */
+                break;
+            case 2:
+                /* 2 - Estastísticas */
+                break;
+            case 3:
 
-            break;
-        case 4: // saiu
-            system("clear");
-            // fechando arquivos para salvar
-            printf("\nEncerrando e fechando arquivos...\n");
-            fclose(filme);
-            fclose(usuarios);
-            fclose(avaliacoes);
-            printf("Arquivos fechados. Ate mais!\n");
-            printf("Saindo do programa...\n");
-            exit(0);
-            break;
+                break;
+            case 7: // saiu
+                system("clear");
+                // fechando arquivos para salvar
+                printf("\nEncerrando e fechando arquivos...\n");
+                fclose(filme);
+                fclose(usuarios);
+                fclose(avaliacoes);
+                printf("Arquivos fechados. Ate mais!\n");
+                printf("Saindo do programa...\n");
+                exit(0);
+                break;
 
-        default:
-            printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 4!! \n \n");
-            break;
+            default:
+                printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 4!! \n \n");
+                break;
+            }
         }
-        
+    }
+    else
+    {
+        while (op != 7)
+        {
+            menuAdmin(&op);
+            // limpa o buffer para a próxima leitura
+            while ((getchar()) != '\n')
+                ;
+
+            switch (op)
+            {
+            case 1:
+                // cadastrarFilme(filme);
+                system("clear");
+                listarFilmes(filme);
+
+                break;
+            case 2:
+                /* 2 - Estastísticas */
+                break;
+            case 3:
+
+                break;
+            case 7: // saiu
+                system("clear");
+                // fechando arquivos para salvar
+                printf("\nEncerrando e fechando arquivos...\n");
+                fclose(filme);
+                fclose(usuarios);
+                fclose(avaliacoes);
+                printf("Arquivos fechados. Ate mais!\n");
+                printf("Saindo do programa...\n");
+                exit(0);
+                break;
+
+            default:
+                printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 4!! \n \n");
+                break;
+            }
+        }
     }
 
     return 0;
@@ -155,10 +192,29 @@ int menuPrincipal(int *op)
     printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------           \n");
     printf("                            1 - Ver filmes                     \n");
     printf("                            2 - Estastísticas                  \n");
-    printf("                            3 - ADM                            \n");
-    printf("                            4 - Sair                           \n");
+    printf("                            3 - Avaliar filme                          \n");
+    printf("                            4- Ver Filmes avaliados                         \n");
+    printf("                            5 - Ver melhores filmes                           \n");
+    printf("                            6 - Ver piores filmes                       \n");
+    printf("                            7 - Sair                           \n");
     printf("                            Escolha sua opção: ");
     scanf("%d", op);
+    return *op;
+}
+
+void menuAdmin(int *op){
+      // system("clear"); utilizar cls no windows
+
+    // 38 espaços
+    printf(ORANGE "                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
+    printf(GREEN "⬤ " RESET);
+    printf(BLUE "⬤ " RESET "\n");
+
+    //  28 espaços
+    printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ADMIN----------           \n");
+    printf("                            1 - Cadastar novo filme                  \n");
+    printf("                            2 - Cadastrar Usuario                  \n");
+    printf("                            3 - Sair                           \n");
     return *op;
 }
 
@@ -308,12 +364,13 @@ void cadastrarUsuario(FILE *arqusuario)
     fgets(user.senha, sizeof(user.senha), stdin);
     remover_quebra_linha(user.senha);
 
-
     fseek(arqusuario, 0, SEEK_SET);
 
-    while(fread(&arquser, sizeof(arquser), 1, arqusuario) == 1){
-        if(strcmp(arquser.nome, user.nome) == 0){
-        printf("\n                            nome indisponivel!                            \n");
+    while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
+    {
+        if (strcmp(arquser.nome, user.nome) == 0)
+        {
+            printf("\n                            nome indisponivel!                            \n");
             return;
         }
     }
@@ -323,7 +380,7 @@ void cadastrarUsuario(FILE *arqusuario)
     printf("\n                            Usuario cadastrado com sucesso!                            \n");
 }
 
-void validarLogin(FILE *arqusuario)
+Usuarios validarLogin(FILE *arqusuario)
 {
 
     Usuarios arquser;
@@ -343,26 +400,13 @@ void validarLogin(FILE *arqusuario)
     {
         if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
         {
-            if (arquser.nome != "admin")
-            {
-                // IMPLEMENTAR CHAMADA PARA MENU DE USUARUO COMUM
-                printf("VALIDADO COMUM");
-                return;
-            }
-            else
-            {
-                // IMPLEMENTAR CHAMADA PARA MENU DE ADMINISTRADOR
-                printf("VALIDADO ADMIN");
-                return;
-            }
-        }
-        else
-        {
-            printf("\nUsuario não encontrado\n");
+            printf("\nusuario encontrado\n");
+            return arquser;
         }
     }
 
     printf("\nUsuario não encontrado\n");
+    return;
 }
 
 void atualizarSenha(FILE *arqusuario, Usuarios user)
