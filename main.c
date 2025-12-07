@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+#define FILMES_POR_PAGINA 10 // paginação filmes
 
 #define ORANGE "\033[38;5;208m"
 #define GREEN "\033[38;5;41m"
@@ -58,6 +61,7 @@ int menuAdmin(int *op);
 // Funções de Filmes
 void cadastrarFilme(FILE *arqfilme);
 void listarFilmes(FILE *arqfilme);
+long contarTotalFilmes(FILE *arqfilme);
 
 // Funções de Usuários
 void cadastrarUsuario(FILE *arqusuario);
@@ -75,6 +79,7 @@ int main()
     FILE *usuarios = abrirUsuarios();
     FILE *avaliacoes = abrirAvaliacoes();
 
+    long contarTotalFilmes(FILE * arqfilme); // Adicionei aqui
     /*
     CADASTRAR 20 FILMES
      int i = 0;
@@ -87,7 +92,6 @@ int main()
     incluir validações de usuario antes de ir para o menu principal
 
     */
-   
 
     Usuarios usuerLogado = validarLogin(usuarios);
     int op = 0;
@@ -203,8 +207,9 @@ int menuPrincipal(int *op)
     return *op;
 }
 
-int menuAdmin(int *op){
-      // system("clear"); utilizar cls no windows
+int menuAdmin(int *op)
+{
+    // system("clear"); utilizar cls no windows
 
     // 38 espaços
     printf(ORANGE "                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
@@ -316,36 +321,172 @@ void cadastrarFilme(FILE *arqfilme)
     fwrite(&filme, sizeof(filme), 1, arqfilme);
     printf("\nFilme cadastrado com sucesso!\n");
 }
+
 void listarFilmes(FILE *arqfilme)
 {
 
-    Filmes filme;
+    Filmes buffer_filmes[FILMES_POR_PAGINA];
+
+    long total_filmes;
+    long total_paginas;
+
+    int pagina_atual = 1;
+
+    size_t tamanho_registro = sizeof(Filmes); // size_t tipo de dado sem sinal que recebe o tamanho em bytes da struct Filmes
+    char opcao_nav;
 
     if (arqfilme == NULL)
     {
-        printf("Erro ao abrir o arquivo.\n");
-        return;
+        printf("Erro: Arquivo de filmes não está aberto.\n");
     }
-    // antes de ler os filmes, mova o ponteiro de leitura para o início do arquivo
+
+    // Calcula o total de filmes e o total de páginas
+    total_filmes = contarTotalFilmes(arqfilme);
+    if (total_filmes == 0)
+    {
+        printf("\n                            [INFO] - Nenhum filme cadastrado.\n");
+    }
+
+    // Calcula o total de páginas arredondando para cima.
+
+    /*
+        A expressão (total_filmes + FILMES_POR_PAGINA - 1) garante que,
+        mesmo que haja filmes "sobrando" na última página, a divisão inteira
+        ainda resultará em mais uma página necessária.
+        ex: 31 + 9 = 40 | 31 filmes
+        40 / 10 = 4 → correto (3 páginas não bastam)
+
+    */
+    total_paginas = (total_filmes + FILMES_POR_PAGINA - 1) / FILMES_POR_PAGINA;
+
+    // loop principal de navegação do menu
+    do
+    {
+        system("clear");
+
+        // 1. Calcular o OFFSET (posição inicial em bytes)
+        // (Página - 1) * Tamanho da Página * Tamanho do Registro
+        long offset = (long)(pagina_atual - 1) * FILMES_POR_PAGINA * tamanho_registro;
+
+        // 2. Posicionar o ponteiro do arquivo para a página correta
+        fseek(arqfilme, offset, SEEK_SET); // fseek(arquivo_manipular, bytes_paraoponteiropular, define_pontodepartida)
+
+        /* 3. Ler o bloco de filmes
+        fread() -> retorna o número total de elementos lidos com sucesso do fluxo de arquivo, e sua tipagem em C é size_t
+        */
+
+        size_t filmes_lidos = fread(
+            buffer_filmes,
+            tamanho_registro,
+            FILMES_POR_PAGINA,
+            arqfilme);
+
+        // Exibição do Cabeçalho
+        printf(ORANGE "                                     ⬤ " RESET);
+        printf(GREEN "⬤ " RESET);
+        printf(BLUE "⬤ " RESET "\n");
+        printf("\n                    ---------- LISTA DE FILMES ----------           \n");
+        printf(BLUE "Página %d de %ld (Total de %ld filmes)\n" RESET, pagina_atual, total_paginas, total_filmes);
+        printf("--------------------------------------------------------------------\n");
+
+        // Exibição dos Filmes da Página
+        for (size_t i = 0; i < filmes_lidos; i++)
+        {
+            // Calcula o número de exibição do filme na lista total
+            long indice_global = offset / tamanho_registro + i + 1;
+
+            printf(GREEN "[%03ld] Título: %s\n" RESET, indice_global, buffer_filmes[i].titulo);
+            printf("      Resumo: %s\n", buffer_filmes[i].resumo);
+            printf("      Avaliação Média: %.1f\n", buffer_filmes[i].avaliacao_media);
+            printf("--------------------------------------------------------------------\n");
+        }
+
+        // Navegação
+        printf("\nNavegação: (A)nterior | (P)róximo | (G)Ir para | (S)air: ");
+        scanf(" %c", &opcao_nav);
+
+        // Consome a quebra de linha restante
+        while (getchar() != '\n')
+            ;
+
+        opcao_nav = toupper(opcao_nav); // Converte para maiúscula para facilitar a comparação
+
+        if (opcao_nav == 'P')
+        {
+            if (pagina_atual < total_paginas)
+            {
+                pagina_atual++;
+            }
+            else
+            {
+                printf(ORANGE "\n                                [INFO] - Você está na última página.\n" RESET);
+                printf("Aperte ENTER para continuar...");
+                getchar(); // espera o usuário pressionar ENTER
+            }
+        }
+        else if (opcao_nav == 'A')
+        {
+            if (pagina_atual > 1)
+            {
+                pagina_atual--;
+            }
+            else
+            {
+                printf(ORANGE "\n                                [INFO] - Você está na primeira página.\n" RESET);
+                printf("Aperte ENTER para continuar...");
+                getchar(); // espera o usuário pressionar ENTER
+            }
+        }
+        else if (opcao_nav == 'G')
+        {
+            int nova_pagina;
+            printf("Ir para a página (1 a %ld): ", total_paginas);
+            scanf("%d", &nova_pagina);
+            while (getchar() != '\n')
+                ; // Limpa o buffer após o scanf
+
+            if (nova_pagina >= 1 && nova_pagina <= total_paginas)
+            {
+                pagina_atual = nova_pagina;
+            }
+            else if (nova_pagina < 1 || nova_pagina > total_paginas)
+            {
+                printf(ORANGE "\n                                [ERRO] - Número de página inválido.\n" RESET);
+                printf("Aperte ENTER para continuar...");
+                getchar(); // espera o usuário pressionar ENTER
+            }
+        }
+
+    } while (opcao_nav != 'S');
+
+    printf("\nRetornando ao menu principal...\n");
+}
+
+long contarTotalFilmes(FILE *arqfilme)
+{
+    if (arqfilme == NULL)
+    {
+        return 0;
+    }
+
+    // 1. Vai para o fim do arquivo
+    fseek(arqfilme, 0, SEEK_END);
+
+    // 2. Obtém a posição atual (tamanho total do arquivo em bytes)
+    long tamanho_bytes = ftell(arqfilme);
+
+    // 3. Volta o ponteiro para o início
     fseek(arqfilme, 0, SEEK_SET);
 
-    printf(ORANGE "                                     ⬤ " RESET);
-    printf(GREEN "⬤ " RESET);
-    printf(BLUE "⬤ " RESET "\n");
-    printf("\n                    ---------- FILMES CADASTRADOS ----------           \n");
-
-    // Lê os filmes do arquivo enquanto não atingir o final
-    while (fread(&filme, sizeof(filme), 1, arqfilme) == 1)
+    // 4. Calcula o número de filmes (registros)
+    // Se o tamanho for 0, retorna 0. Senão, divide pelo tamanho da struct Filme.
+    if (tamanho_bytes == 0)
     {
-        printf("\n                               Título: %s\n", filme.titulo);
-        printf("                               Resumo: %s\n", filme.resumo);
-        printf("                    ----------------------------------------\n");
+        return 0;
     }
 
-    if (ferror(arqfilme))
-    {
-        printf("Erro ao ler o arquivo.\n");
-    }
+    // Garante a divisão correta pelo tamanho do registro
+    return tamanho_bytes / sizeof(Filmes);
 }
 
 /*-------------------MODULO DE FUNÇÕES DE USUARIOS-------------------*/
@@ -372,7 +513,6 @@ void cadastrarUsuario(FILE *arqusuario)
         if (strcmp(arquser.nome, user.nome) == 0)
         {
             printf("\n                            nome indisponivel!                            \n");
-            return;
         }
     }
 
