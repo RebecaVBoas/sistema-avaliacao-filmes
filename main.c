@@ -1,6 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+#define FILMES_POR_PAGINA 10 // paginação filmes
+
+#define ORANGE "\033[38;5;208m"
+#define GREEN "\033[38;5;41m"
+#define BLUE "\033[38;5;75m"
+#define RESET "\033[0m"
+
+/* modo de uso
+    printf(ORANGE "Cor 1 (#ff8000)\n" RESET);
+    printf(GREEN  "Cor 2 (#00e054)\n" RESET);
+    printf(BLUE   "Cor 3 (#40bcf4)\n" RESET);
+    return 0;
+*/
+
+/*-------------------MODULO DE FUNÇÕES DEFINIÇÃO DAS STRUCTS-------------------*/
 
 typedef struct
 {
@@ -29,16 +46,560 @@ typedef struct
 
 } Usuarios;
 
-void menuPrincipal()
+/*------------------- MÓDULO DE LISTAGEM DAS FUNÇÕES -------------------*/
+
+// Funções de Abertura de Arquivo
+// MODIFICAR TIPO DO ARQUIVO E PARAMETRO DO fopen()
+FILE *abrirFilme();
+FILE *abrirUsuarios();
+FILE *abrirAvaliacoes();
+
+// Funções do Menu
+int menuPrincipal(int *op);
+int menuAdmin(int *op);
+
+// Funções de Filmes
+void cadastrarFilme(FILE *arqfilme);
+void listarFilmes(FILE *arqfilme);
+long contarTotalFilmes(FILE *arqfilme);
+
+// Funções de Usuários
+void cadastrarUsuario(FILE *arqusuario);
+Usuarios validarLogin(FILE *arqusuario);
+void atualizarSenha(FILE *arqusuario, Usuarios user);
+void imprimirUsuarios(FILE *arqusuario);
+
+// Funções Utilitárias
+void remover_quebra_linha(char *str);
+
+int main()
 {
-    system("clear"); // utilizar cls no windows
-    // 28 espaços
+
+    FILE *filme = abrirFilme();
+    FILE *usuarios = abrirUsuarios();
+    FILE *avaliacoes = abrirAvaliacoes();
+
+    long contarTotalFilmes(FILE * arqfilme); // Adicionei aqui
+    /*
+    CADASTRAR 20 FILMES
+     int i = 0;
+     while (i < 20)
+     {
+         cadastrarFilme(filme);
+         i++;
+     }
+
+    incluir validações de usuario antes de ir para o menu principal
+
+    */
+
+    Usuarios usuerLogado = validarLogin(usuarios);
+    int op = 0;
+
+    if (strcmp(usuerLogado.nome, "admin") != 0)
+    {
+        // menuAdmin;
+
+        while (op != 7)
+        {
+            menuPrincipal(&op);
+            // limpa o buffer para a próxima leitura
+            while ((getchar()) != '\n')
+                ;
+
+            switch (op)
+            {
+            case 1:
+                // cadastrarFilme(filme);
+                system("clear");
+                listarFilmes(filme);
+
+                break;
+            case 2:
+                /* 2 - Estastísticas */
+                break;
+            case 3:
+
+                break;
+            case 7: // saiu
+                system("clear");
+                // fechando arquivos para salvar
+                printf("\nEncerrando e fechando arquivos...\n");
+                fclose(filme);
+                fclose(usuarios);
+                fclose(avaliacoes);
+                printf("Arquivos fechados. Ate mais!\n");
+                printf("Saindo do programa...\n");
+                exit(0);
+                break;
+
+            default:
+                printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 4!! \n \n");
+                break;
+            }
+        }
+    }
+    else
+    {
+        while (op != 7)
+        {
+            menuAdmin(&op);
+            // limpa o buffer para a próxima leitura
+            while ((getchar()) != '\n')
+                ;
+
+            switch (op)
+            {
+            case 1:
+                // cadastrarFilme(filme);
+                system("clear");
+                listarFilmes(filme);
+
+                break;
+            case 2:
+                /* 2 - Estastísticas */
+                break;
+            case 3:
+
+                break;
+            case 7: // saiu
+                system("clear");
+                // fechando arquivos para salvar
+                printf("\nEncerrando e fechando arquivos...\n");
+                fclose(filme);
+                fclose(usuarios);
+                fclose(avaliacoes);
+                printf("Arquivos fechados. Ate mais!\n");
+                printf("Saindo do programa...\n");
+                exit(0);
+                break;
+
+            default:
+                printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 4!! \n \n");
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
+
+int menuPrincipal(int *op)
+{
+    // system("clear"); utilizar cls no windows
+
+    // 38 espaços
+    printf(ORANGE "                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
+    printf(GREEN "⬤ " RESET);
+    printf(BLUE "⬤ " RESET "\n");
+
+    //  28 espaços
     printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------           \n");
     printf("                            1 - Ver filmes                     \n");
     printf("                            2 - Estastísticas                  \n");
-    printf("                            3 - ADM                            \n");
-    printf("                            4 - Sair                           \n");
+    printf("                            3 - Avaliar filme                          \n");
+    printf("                            4- Ver Filmes avaliados                         \n");
+    printf("                            5 - Ver melhores filmes                           \n");
+    printf("                            6 - Ver piores filmes                       \n");
+    printf("                            7 - Sair                           \n");
+    printf("                            Escolha sua opção: ");
+    scanf("%d", op);
+    return *op;
 }
+
+int menuAdmin(int *op)
+{
+    // system("clear"); utilizar cls no windows
+
+    // 38 espaços
+    printf(ORANGE "                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
+    printf(GREEN "⬤ " RESET);
+    printf(BLUE "⬤ " RESET "\n");
+
+    //  28 espaços
+    printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ADMIN----------           \n");
+    printf("                            1 - Cadastar novo filme                  \n");
+    printf("                            2 - Cadastrar Usuario                  \n");
+    printf("                            3 - Sair                           \n");
+    return *op;
+}
+
+/*-------------------MODULO DE FUNÇÕES DE ABERTURA DOS ARQUIVOS-------------------*/
+
+FILE *abrirFilme()
+{
+    FILE *filmes;
+
+    filmes = fopen("filmes.dat", "r+b");
+
+    if (filmes == NULL)
+    {
+        filmes = fopen("filmes.dat", "w+b");
+
+        if (filmes == NULL)
+        {
+            printf("ERRO, NÃO FOI POSÍVEL ABRIR O ARQUIVO FILMES");
+            return NULL;
+        }
+    }
+
+    printf("\nARQUIVO FILME ABERTO \n");
+    return filmes;
+}
+
+FILE *abrirUsuarios()
+{
+    FILE *usuarios;
+
+    usuarios = fopen("usuarios.dat", "r+b");
+    if (usuarios == NULL)
+    {
+        usuarios = fopen("usuarios.dat", "w+b");
+
+        if (usuarios == NULL)
+        {
+            printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO USUARIOS.DATA \n");
+            return NULL;
+        }
+    }
+
+    printf("\nARQUIVO USUARIOS.DATA ABERTO\n");
+    return usuarios;
+}
+
+FILE *abrirAvaliacoes()
+{
+    FILE *avaliacoes;
+    avaliacoes = fopen("avaliacoes.dat", "r+w");
+
+    {
+        avaliacoes = fopen("avaliacoes .dat", "w+b");
+
+        if (avaliacoes == NULL)
+        {
+            printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO USUARIOS.DATA \n");
+            return NULL;
+        }
+    }
+
+    printf("\nARQUIVO USUARIOS.DATA ABERTO\n");
+    return avaliacoes;
+}
+
+/*-------------------MODULO DE FUNÇÕES DE FILMES-------------------*/
+
+void cadastrarFilme(FILE *arqfilme)
+{
+
+    Filmes filme;
+    fseek(arqfilme, 0, SEEK_END);
+
+    /* ⬤ é Unicode, que é um padrão universal que define números (códigos)
+    para representar todos os caracteres que existem */
+    printf(ORANGE "                                     ⬤ " RESET);
+    printf(GREEN "⬤ " RESET);
+    printf(BLUE "⬤ " RESET "\n");
+    printf("\n                 ---------- CADASTRANDO NOVO FILME ----------           \n");
+
+    printf("\n                            Informe o título do filme: ");
+    fgets(filme.titulo, sizeof(filme.titulo), stdin);
+    remover_quebra_linha(filme.titulo);
+
+    printf("\n                            Adcione o resumo: ");
+    fgets(filme.resumo, sizeof(filme.resumo), stdin);
+    remover_quebra_linha(filme.resumo);
+
+    /*PENDENTE: IMPLEMENTAR NAS FUNÇÕES ENVOLVIDAS O CÁLCULO DESSES
+    VALORES AUTOMATICAMENTE */
+
+    filme.avaliacao_media = 0;
+
+    filme.qtdAvalia = 0;
+
+    filme.qtdComent = 0;
+
+    fwrite(&filme, sizeof(filme), 1, arqfilme);
+    printf("\nFilme cadastrado com sucesso!\n");
+}
+
+void listarFilmes(FILE *arqfilme)
+{
+
+    Filmes buffer_filmes[FILMES_POR_PAGINA];
+
+    long total_filmes;
+    long total_paginas;
+
+    int pagina_atual = 1;
+
+    size_t tamanho_registro = sizeof(Filmes); // size_t tipo de dado sem sinal que recebe o tamanho em bytes da struct Filmes
+    char opcao_nav;
+
+    if (arqfilme == NULL)
+    {
+        printf("Erro: Arquivo de filmes não está aberto.\n");
+    }
+
+    // Calcula o total de filmes e o total de páginas
+    total_filmes = contarTotalFilmes(arqfilme);
+    if (total_filmes == 0)
+    {
+        printf("\n                            [INFO] - Nenhum filme cadastrado.\n");
+    }
+
+    // Calcula o total de páginas arredondando para cima.
+
+    /*
+        A expressão (total_filmes + FILMES_POR_PAGINA - 1) garante que,
+        mesmo que haja filmes "sobrando" na última página, a divisão inteira
+        ainda resultará em mais uma página necessária.
+        ex: 31 + 9 = 40 | 31 filmes
+        40 / 10 = 4 → correto (3 páginas não bastam)
+
+    */
+    total_paginas = (total_filmes + FILMES_POR_PAGINA - 1) / FILMES_POR_PAGINA;
+
+    // loop principal de navegação do menu
+    do
+    {
+        system("clear");
+
+        // 1. Calcular o OFFSET (posição inicial em bytes)
+        // (Página - 1) * Tamanho da Página * Tamanho do Registro
+        long offset = (long)(pagina_atual - 1) * FILMES_POR_PAGINA * tamanho_registro;
+
+        // 2. Posicionar o ponteiro do arquivo para a página correta
+        fseek(arqfilme, offset, SEEK_SET); // fseek(arquivo_manipular, bytes_paraoponteiropular, define_pontodepartida)
+
+        /* 3. Ler o bloco de filmes
+        fread() -> retorna o número total de elementos lidos com sucesso do fluxo de arquivo, e sua tipagem em C é size_t
+        */
+
+        size_t filmes_lidos = fread(
+            buffer_filmes,
+            tamanho_registro,
+            FILMES_POR_PAGINA,
+            arqfilme);
+
+        // Exibição do Cabeçalho
+        printf(ORANGE "                                     ⬤ " RESET);
+        printf(GREEN "⬤ " RESET);
+        printf(BLUE "⬤ " RESET "\n");
+        printf("\n                    ---------- LISTA DE FILMES ----------           \n");
+        printf(BLUE "Página %d de %ld (Total de %ld filmes)\n" RESET, pagina_atual, total_paginas, total_filmes);
+        printf("--------------------------------------------------------------------\n");
+
+        // Exibição dos Filmes da Página
+        for (size_t i = 0; i < filmes_lidos; i++)
+        {
+            // Calcula o número de exibição do filme na lista total
+            long indice_global = offset / tamanho_registro + i + 1;
+
+            printf(GREEN "[%03ld] Título: %s\n" RESET, indice_global, buffer_filmes[i].titulo);
+            printf("      Resumo: %s\n", buffer_filmes[i].resumo);
+            printf("      Avaliação Média: %.1f\n", buffer_filmes[i].avaliacao_media);
+            printf("--------------------------------------------------------------------\n");
+        }
+
+        // Navegação
+        printf("\nNavegação: (A)nterior | (P)róximo | (G)Ir para | (S)air: ");
+        scanf(" %c", &opcao_nav);
+
+        // Consome a quebra de linha restante
+        while (getchar() != '\n')
+            ;
+
+        opcao_nav = toupper(opcao_nav); // Converte para maiúscula para facilitar a comparação
+
+        if (opcao_nav == 'P')
+        {
+            if (pagina_atual < total_paginas)
+            {
+                pagina_atual++;
+            }
+            else
+            {
+                printf(ORANGE "\n                                [INFO] - Você está na última página.\n" RESET);
+                printf("Aperte ENTER para continuar...");
+                getchar(); // espera o usuário pressionar ENTER
+            }
+        }
+        else if (opcao_nav == 'A')
+        {
+            if (pagina_atual > 1)
+            {
+                pagina_atual--;
+            }
+            else
+            {
+                printf(ORANGE "\n                                [INFO] - Você está na primeira página.\n" RESET);
+                printf("Aperte ENTER para continuar...");
+                getchar(); // espera o usuário pressionar ENTER
+            }
+        }
+        else if (opcao_nav == 'G')
+        {
+            int nova_pagina;
+            printf("Ir para a página (1 a %ld): ", total_paginas);
+            scanf("%d", &nova_pagina);
+            while (getchar() != '\n')
+                ; // Limpa o buffer após o scanf
+
+            if (nova_pagina >= 1 && nova_pagina <= total_paginas)
+            {
+                pagina_atual = nova_pagina;
+            }
+            else if (nova_pagina < 1 || nova_pagina > total_paginas)
+            {
+                printf(ORANGE "\n                                [ERRO] - Número de página inválido.\n" RESET);
+                printf("Aperte ENTER para continuar...");
+                getchar(); // espera o usuário pressionar ENTER
+            }
+        }
+
+    } while (opcao_nav != 'S');
+
+    printf("\nRetornando ao menu principal...\n");
+}
+
+long contarTotalFilmes(FILE *arqfilme)
+{
+    if (arqfilme == NULL)
+    {
+        return 0;
+    }
+
+    // 1. Vai para o fim do arquivo
+    fseek(arqfilme, 0, SEEK_END);
+
+    // 2. Obtém a posição atual (tamanho total do arquivo em bytes)
+    long tamanho_bytes = ftell(arqfilme);
+
+    // 3. Volta o ponteiro para o início
+    fseek(arqfilme, 0, SEEK_SET);
+
+    // 4. Calcula o número de filmes (registros)
+    // Se o tamanho for 0, retorna 0. Senão, divide pelo tamanho da struct Filme.
+    if (tamanho_bytes == 0)
+    {
+        return 0;
+    }
+
+    // Garante a divisão correta pelo tamanho do registro
+    return tamanho_bytes / sizeof(Filmes);
+}
+
+/*-------------------MODULO DE FUNÇÕES DE USUARIOS-------------------*/
+
+void cadastrarUsuario(FILE *arqusuario)
+{
+
+    Usuarios user, arquser;
+
+    printf("\n                 ---------- CADASTRANDO NOVO USUARIO ----------           \n");
+
+    printf("\n                            Login: ");
+    fgets(user.nome, sizeof(user.nome), stdin);
+    remover_quebra_linha(user.nome);
+
+    printf("\n                            Senha: ");
+    fgets(user.senha, sizeof(user.senha), stdin);
+    remover_quebra_linha(user.senha);
+
+    fseek(arqusuario, 0, SEEK_SET);
+
+    while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
+    {
+        if (strcmp(arquser.nome, user.nome) == 0)
+        {
+            printf("\n                            nome indisponivel!                            \n");
+        }
+    }
+
+    fseek(arqusuario, 0, SEEK_END);
+    fwrite(&user, sizeof(user), 1, arqusuario);
+    printf("\n                            Usuario cadastrado com sucesso!                            \n");
+}
+
+Usuarios validarLogin(FILE *arqusuario)
+{
+
+    Usuarios arquser;
+    Usuarios login;
+
+    printf("\n                 ---------- LOGIN ----------           \n");
+
+    printf("                            LOGIN: ");
+    fgets(login.nome, sizeof(login.nome), stdin);
+    remover_quebra_linha(login.nome);
+
+    printf("\n                            SENHA: ");
+    fgets(login.senha, sizeof(login.senha), stdin);
+    remover_quebra_linha(login.senha);
+
+    while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
+    {
+        if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
+        {
+            printf("\nusuario encontrado\n");
+            return arquser;
+        }
+    }
+
+    printf("\nUsuario não encontrado\n");
+    return;
+}
+
+void atualizarSenha(FILE *arqusuario, Usuarios user)
+{
+
+    Usuarios arqUser;
+
+    for (;;)
+    {
+        fread(&arqUser, sizeof(arqUser), 1, arqusuario);
+
+        if (strcmp(arqUser.nome, user.nome) == 0)
+        {
+            printf("Informe a nova senha");
+            fgets(arqUser.senha, sizeof(arqUser.senha), stdin);
+            remover_quebra_linha(arqUser.senha);
+            fseek(arqusuario, -sizeof(arqUser), SEEK_CUR);
+            fwrite(&arqUser, sizeof(arqUser), 1, arqusuario);
+            break;
+        }
+
+        // Verificar primeiro
+        if (feof(arqusuario))
+            break;
+    }
+}
+
+/* NOVA FUNÇÃO: LÊ TODOS OS USUÁRIOS DO ARQUIVO E IMPRIME */
+void imprimirUsuarios(FILE *arqusuario)
+{
+    Usuarios user;
+    int contador = 0;
+
+    // volta o ponteiro do arquivo para o início
+    rewind(arqusuario);
+
+    printf("\n---------- LISTA DE USUÁRIOS CADASTRADOS ----------\n");
+
+    while (fread(&user, sizeof(user), 1, arqusuario))
+    {
+        printf("Usuário %d:\n", ++contador);
+        printf("   Nome:  %s\n", user.nome);
+        printf("   Senha: %s\n\n", user.senha);
+    }
+
+    if (contador == 0)
+        printf("Nenhum usuário cadastrado ainda.\n");
+}
+
+/*-------------------MODULO DE FUNÇÕES DE AVALIAÇÕES-------------------*/
+
+/*-------------------MODULO DE FUNÇÕES GÊNERICAS-------------------*/
 
 // Remove o '\n' do final de uma string
 void remover_quebra_linha(char *str)
@@ -61,139 +622,4 @@ void remover_quebra_linha(char *str)
         // se for, substitui o '\n' por um '\0', "cortando" a string um caractere antes
         str[i - 1] = '\0';
     }
-}
-
-FILE *abrirFilme()
-{
-    FILE *filmes;
-
-    filmes = fopen("filmes.data", "a+b");
-
-    if (filmes == NULL)
-    {
-        printf("ERRO, NÃO FOI POSÍVEL ABRIR O ARQUIVO FILMES");
-        return NULL;
-    }
-    else
-    {
-        printf("\nARQUIVO FILME ABERTO \n");
-        return filmes;
-    }
-}
-
-FILE *abrirUsuarios()
-{
-    FILE *usuarios;
-
-    usuarios = fopen("usuarios.data", "a+b");
-    if (usuarios == NULL)
-    {
-        printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO USUARIOS.DATA \n");
-        return NULL;
-    }
-    else
-    {
-        printf("\nARQUIVO USUARIOS.DATA ABERTO\n");
-        return usuarios;
-    }
-}
-
-FILE *abrirAvaliacoes()
-{
-    FILE *avaliacoes;
-    avaliacoes = fopen("avaliacoes.data", "a+b");
-
-    if (avaliacoes == NULL)
-    {
-        printf("\nERRO. NÃO FOI POSSIVEL ABRIRO ARQUIVO AVALIACOES.DATA\n");
-        return NULL;
-    }
-    else
-    {
-        printf("\nARQUIVO AVALIACOES.DATA ABERTO\n");
-        return avaliacoes;
-    }
-}
-
-void cadastrarFilme(FILE *arqfilme)
-{
-
-    Filmes filme;
-
-    printf("\n----------------CADASTRANDO NOVO FILME----------------\n");
-
-    printf("\nInforme o título do filme: \n");
-    fgets(filme.titulo, sizeof(filme.titulo), stdin);
-    remover_quebra_linha(filme.titulo);
-
-    printf("\nAdcione o resumo: \n");
-    fgets(filme.resumo, sizeof(filme.resumo), stdin);
-    remover_quebra_linha(filme.resumo);
-
-    /*PENDENTE: IMPLEMENTAR NAS FUNÇÕES ENVOLVIDAS O CÁLCULO DESSES
-    VALORES AUTOMATICAMENTE */
-
-    filme.avaliacao_media = 0;
-
-    filme.qtdAvalia = 0;
-
-    filme.qtdComent = 0;
-
-    fwrite(&filme, sizeof(filme), 1, arqfilme);
-    printf("\nFilme cadastrado com sucesso!\n");
-}
-
-void cadastrarUsuario(FILE *arqusuario)
-{
-
-    Usuarios user;
-
-    printf("\n----------------CADASTRANDO NOVO USUARIO----------------\n");
-
-    printf("\nLogin:\n");
-    fgets(user.nome, sizeof(user.nome), stdin);
-    remover_quebra_linha(user.nome);
-
-    printf("\nSenha:\n");
-    fgets(user.senha, sizeof(user.senha), stdin);
-    remover_quebra_linha(user.senha);
-
-    fwrite(&user, sizeof(user), 1, arqusuario);
-    printf("\nUsuario cadastrado com sucesso!\n");
-}
-
-int main()
-{
-
-    FILE *filme = abrirFilme();
-    FILE *usuarios = abrirUsuarios();
-    FILE *avaliacoes = abrirAvaliacoes();
-
-    // TESTE
-
-    Usuarios login;
-    /*
-        declarações das variaveis
-    */
-   
-    // CADASTRAR 20 FILMES
-    //  int i = 0;
-    //  while (i < 20)
-    //  {
-    //      cadastrarFilme(filme);
-    //      i++;
-    //  }
-
-    // incluir validações de usuario antes de ir para o menu principal
-
-    menuPrincipal();
-
-    // fechando arquivos para salvar
-    printf("\nEncerrando e fechando arquivos...\n");
-    fclose(filme);
-    fclose(usuarios);
-    fclose(avaliacoes);
-    printf("Arquivos fechados. Ate mais!\n");
-
-    return 0;
 }
