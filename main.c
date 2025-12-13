@@ -322,7 +322,7 @@ void cadastrarFilme(FILE *arqfilme)
     VALORES AUTOMATICAMENTE */
 
     filme.avaliacao_media = 0;
-    filme.soma_notas = 0;     
+    filme.soma_notas = 0;
     filme.qtdAvalia = 0;
     filme.qtdComent = 0;
 
@@ -337,6 +337,7 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
 
     long total_filmes;
     long total_paginas;
+    char coment;
 
     int pagina_atual = 1;
 
@@ -412,7 +413,8 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
         // Navegação Atualizada
         printf("\nNavegação: (A)nterior | (P)róximo | (G)Ir Pag | (E)Avaliar | (S)air: ");
         scanf(" %c", &opcao_nav);
-        while (getchar() != '\n'); // Limpa buffer
+        while (getchar() != '\n')
+            ; // Limpa buffer
         opcao_nav = toupper(opcao_nav);
 
         if (opcao_nav == 'P')
@@ -460,22 +462,26 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                 getchar(); // espera o usuário pressionar ENTER
             }
         }
-        if (opcao_nav == 'E') {
+        if (opcao_nav == 'E')
+        {
             long id_escolhido;
             printf("\nInforme o ID do filme que deseja avaliar (ex: 1, 2...): ");
             scanf("%ld", &id_escolhido);
-            while (getchar() != '\n');
+            while (getchar() != '\n')
+                ;
 
             // Verifica se o ID é válido
-            if (id_escolhido > 0 && id_escolhido <= total_filmes) {
-                
+            if (id_escolhido > 0 && id_escolhido <= total_filmes)
+            {
+
                 Filmes filme_edit;
                 Avaliar nova_avaliacao;
-                
+
                 // Logica para achar o filme no arquivo
                 // O ID 1 está no byte 0. O ID 2 está no byte sizeof(Filmes)...
-                long offset_filme = (id_escolhido - 1) * sizeof(Filmes);
                 
+                long offset_filme = (id_escolhido - 1) * sizeof(Filmes);
+
                 fseek(arqfilme, offset_filme, SEEK_SET);
                 fread(&filme_edit, sizeof(Filmes), 1, arqfilme);
 
@@ -483,30 +489,53 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
 
                 // 2. PEDIR A NOTA E COMENTÁRIO
                 int nota_temp;
-                do {
-                    printf("Nota (0 a 5[⭐⭐⭐⭐⭐]): "); 
+                do
+                {
+                    printf("Nota (0 a 5[⭐⭐⭐⭐⭐]): ");
                     scanf("%d", &nota_temp);
                 } while (nota_temp < 0 || nota_temp > 5);
-                while (getchar() != '\n');
+                while (getchar() != '\n')
+                    ;
 
-                printf("Comentário curto: ");
-                fgets(nova_avaliacao.comentario, sizeof(nova_avaliacao.comentario), stdin);
-                remover_quebra_linha(nova_avaliacao.comentario);
+                do
+                {
+                    printf("Você quer adicionar um comentario? (S) -> sim || (N) -> nao\n");
+                    scanf("%c", &coment);
+                    while (getchar() != '\n')
+                        ;
+                    coment = toupper(coment);
+                } while (coment != 'S' && coment != 'N');
 
-                // 3. ATUALIZAR ESTATÍSTICAS DO FILME (Memória)
-                filme_edit.soma_notas += nota_temp;
-                filme_edit.qtdAvalia++;
+                strcpy(nova_avaliacao.comentario, "");
+                if (coment == 'S')
+                {
+                    printf("Comentário curto: ");
+                    fgets(nova_avaliacao.comentario, sizeof(nova_avaliacao.comentario), stdin);
+                    remover_quebra_linha(nova_avaliacao.comentario);
+                }
+                else
+                {
+                    strcpy(nova_avaliacao.comentario, "Sem comentário");
+                }
+
+                // 3. RECALCULAR A MEDIA DOS FILMES AUTOMATICAMENTE
+
+                filme_edit.soma_notas += nota_temp; // somatorio de notas totais
+                filme_edit.qtdAvalia++;             // quantidade de avaliação
+
                 // Proteção contra divisão por zero e cálculo da média
-                if (filme_edit.qtdAvalia > 0) {
+                if (filme_edit.qtdAvalia > 0)
+                {
                     filme_edit.avaliacao_media = (float)filme_edit.soma_notas / filme_edit.qtdAvalia;
                 }
 
                 // 4. SALVAR ALTERAÇÃO NO ARQUIVO DE FILMES (Sobrescrever)
+
                 fseek(arqfilme, offset_filme, SEEK_SET); // Volta para o início do registro
                 fwrite(&filme_edit, sizeof(Filmes), 1, arqfilme);
-                
+
                 // Força a gravação no disco agora
-                fflush(arqfilme); 
+                fflush(arqfilme);
 
                 // 5. REGISTRAR O LOG DA AVALIAÇÃO (Arquivo de Avaliações)
                 strcpy(nova_avaliacao.titulo, filme_edit.titulo);
@@ -515,13 +544,14 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
 
                 fseek(arqavaliacoes, 0, SEEK_END); // Vai para o fim
                 fwrite(&nova_avaliacao, sizeof(Avaliar), 1, arqavaliacoes);
-                fflush(arqavaliacoes); //força a gravar logo
+                fflush(arqavaliacoes); // força a gravar logo
 
                 printf(GREEN "\nAvaliação registrada com sucesso!\n" RESET);
                 printf("Pressione ENTER para continuar...");
                 getchar();
-
-            } else {
+            }
+            else
+            {
                 printf(ORANGE "ID Inválido!\n" RESET);
                 getchar();
             }
