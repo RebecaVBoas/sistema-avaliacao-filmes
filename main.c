@@ -114,7 +114,7 @@ int main()
     }
     else if (strcmp(usuerLogado.nome, "admin") != 0)
     {
-        // menuAdmin;
+        // menu principal;
 
         while (op != 8)
         {
@@ -496,6 +496,8 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
         }
         if (opcao_nav == 'E')
         {
+            Avaliar leitura_temp;
+            int ja_avaliou = 0;
             long id_escolhido;
             printf("\nInforme o ID do filme que deseja avaliar (ex: 1, 2...): ");
             scanf("%ld", &id_escolhido);
@@ -521,13 +523,14 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
 
                 // 2. PEDIR A NOTA E COMENTÁRIO
                 int nota_temp;
+
                 do
                 {
                     printf("Nota (0 a 5[⭐⭐⭐⭐⭐]): ");
                     scanf("%d", &nota_temp);
+                    while (getchar() != '\n')
+                        ;
                 } while (nota_temp < 0 || nota_temp > 5);
-                while (getchar() != '\n')
-                    ;
 
                 do
                 {
