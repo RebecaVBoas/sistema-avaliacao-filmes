@@ -72,6 +72,9 @@ void imprimirUsuarios(FILE *arqusuario);
 // Funções de Avaliação
 
 void adicionaravaliação(FILE *arqavaliacoes);
+void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes);
+void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes);
+void exibirFilmesAvaliadosPorUsuario(char user[], FILE *arqavaliacoes);
 
 // Funções Utilitárias
 void remover_quebra_linha(char *str);
@@ -100,7 +103,18 @@ int main()
     Usuarios usuerLogado = validarLogin(usuarios);
     int op = 0;
 
-    if (strcmp(usuerLogado.nome, "admin") != 0)
+    // VARIAVEIS CASE 6
+    char userPesquisa[20];
+
+    // VARIAVEIS CASE 7
+    char filmePesquisa[100];
+
+        if (strcmp(usuerLogado.nome, "nullLogin"))
+    {
+        printf("Usuario não encontrado");
+    }
+
+    else if (strcmp(usuerLogado.nome, "admin") != 0)
     {
         // menuAdmin;
 
@@ -131,7 +145,25 @@ int main()
             case 5:
                 // ver piores filmes
                 break;
-            case 6: // saiu
+            case 6:
+                // ver avaliações por usuario
+                printf("Informe o nome do usuário que deseja pesquisar: ");
+                fgets(userPesquisa, sizeof(userPesquisa), stdin);
+
+                remover_quebra_linha;
+
+                exibirAvaliacoesPorUsuario(userPesquisa, avaliacoes);
+                break;
+            case 7:
+                // ver avaliações por filme
+                printf("Informe o nome do filme que deseja pesquisar: ");
+                fgets(filmePesquisa, sizeof(filmePesquisa), stdin);
+
+                remover_quebra_linha;
+
+                exibirAvaliacoesPorUsuario(filmePesquisa, avaliacoes);
+                break;
+            case 8: // saiu
                 system("clear");
                 // fechando arquivos para salvar
                 printf("\nEncerrando e fechando arquivos...\n");
@@ -210,7 +242,9 @@ int menuPrincipal(int *op)
     printf("                            3 - Ver Filmes avaliados                         \n");
     printf("                            4 - Ver melhores filmes                           \n");
     printf("                            5 - Ver piores filmes                       \n");
-    printf("                            6 - Sair                           \n");
+    printf("                            6 - Ver avaliações por usuário                       \n");
+    printf("                            7 - Ver avaliações por filmes                       \n");
+    printf("                            8 - Sair                           \n");
     printf("                            Escolha sua opção: ");
     scanf("%d", op);
     return *op;
@@ -322,7 +356,7 @@ void cadastrarFilme(FILE *arqfilme)
     VALORES AUTOMATICAMENTE */
 
     filme.avaliacao_media = 0;
-    filme.soma_notas = 0;     
+    filme.soma_notas = 0;
     filme.qtdAvalia = 0;
     filme.qtdComent = 0;
 
@@ -412,7 +446,8 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
         // Navegação Atualizada
         printf("\nNavegação: (A)nterior | (P)róximo | (G)Ir Pag | (E)Avaliar | (S)air: ");
         scanf(" %c", &opcao_nav);
-        while (getchar() != '\n'); // Limpa buffer
+        while (getchar() != '\n')
+            ; // Limpa buffer
         opcao_nav = toupper(opcao_nav);
 
         if (opcao_nav == 'P')
@@ -460,22 +495,25 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                 getchar(); // espera o usuário pressionar ENTER
             }
         }
-        if (opcao_nav == 'E') {
+        if (opcao_nav == 'E')
+        {
             long id_escolhido;
             printf("\nInforme o ID do filme que deseja avaliar (ex: 1, 2...): ");
             scanf("%ld", &id_escolhido);
-            while (getchar() != '\n');
+            while (getchar() != '\n')
+                ;
 
             // Verifica se o ID é válido
-            if (id_escolhido > 0 && id_escolhido <= total_filmes) {
-                
+            if (id_escolhido > 0 && id_escolhido <= total_filmes)
+            {
+
                 Filmes filme_edit;
                 Avaliar nova_avaliacao;
-                
+
                 // Logica para achar o filme no arquivo
                 // O ID 1 está no byte 0. O ID 2 está no byte sizeof(Filmes)...
                 long offset_filme = (id_escolhido - 1) * sizeof(Filmes);
-                
+
                 fseek(arqfilme, offset_filme, SEEK_SET);
                 fread(&filme_edit, sizeof(Filmes), 1, arqfilme);
 
@@ -483,11 +521,13 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
 
                 // 2. PEDIR A NOTA E COMENTÁRIO
                 int nota_temp;
-                do {
-                    printf("Nota (0 a 5[⭐⭐⭐⭐⭐]): "); 
+                do
+                {
+                    printf("Nota (0 a 5[⭐⭐⭐⭐⭐]): ");
                     scanf("%d", &nota_temp);
                 } while (nota_temp < 0 || nota_temp > 5);
-                while (getchar() != '\n');
+                while (getchar() != '\n')
+                    ;
 
                 printf("Comentário curto: ");
                 fgets(nova_avaliacao.comentario, sizeof(nova_avaliacao.comentario), stdin);
@@ -497,16 +537,17 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                 filme_edit.soma_notas += nota_temp;
                 filme_edit.qtdAvalia++;
                 // Proteção contra divisão por zero e cálculo da média
-                if (filme_edit.qtdAvalia > 0) {
+                if (filme_edit.qtdAvalia > 0)
+                {
                     filme_edit.avaliacao_media = (float)filme_edit.soma_notas / filme_edit.qtdAvalia;
                 }
 
                 // 4. SALVAR ALTERAÇÃO NO ARQUIVO DE FILMES (Sobrescrever)
                 fseek(arqfilme, offset_filme, SEEK_SET); // Volta para o início do registro
                 fwrite(&filme_edit, sizeof(Filmes), 1, arqfilme);
-                
+
                 // Força a gravação no disco agora
-                fflush(arqfilme); 
+                fflush(arqfilme);
 
                 // 5. REGISTRAR O LOG DA AVALIAÇÃO (Arquivo de Avaliações)
                 strcpy(nova_avaliacao.titulo, filme_edit.titulo);
@@ -515,13 +556,14 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
 
                 fseek(arqavaliacoes, 0, SEEK_END); // Vai para o fim
                 fwrite(&nova_avaliacao, sizeof(Avaliar), 1, arqavaliacoes);
-                fflush(arqavaliacoes); //força a gravar logo
+                fflush(arqavaliacoes); // força a gravar logo
 
                 printf(GREEN "\nAvaliação registrada com sucesso!\n" RESET);
                 printf("Pressione ENTER para continuar...");
                 getchar();
-
-            } else {
+            }
+            else
+            {
                 printf(ORANGE "ID Inválido!\n" RESET);
                 getchar();
             }
@@ -616,8 +658,11 @@ Usuarios validarLogin(FILE *arqusuario)
         }
     }
 
+    Usuarios nullLogin;
+    strcpy(nullLogin.nome, "nullLogin");
+
     printf("\nUsuario não encontrado\n");
-    return;
+    return nullLogin;
 }
 
 void atualizarSenha(FILE *arqusuario, Usuarios user)
@@ -668,6 +713,85 @@ void imprimirUsuarios(FILE *arqusuario)
 }
 
 /*-------------------MODULO DE FUNÇÕES DE AVALIAÇÕES-------------------*/
+
+void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes)
+{
+
+    fseek(arqavaliacoes, 0, SEEK_SET);
+
+    int qtAvaliacaoPorUser = 0;
+
+    Avaliar avUser;
+    while (fread(&avUser, sizeof(Avaliar), 1, arqavaliacoes) != 1)
+    {
+        if (strcmp(avUser.usuario, user) == 0)
+        {
+            printf("--------------AVALIAÇÃO %d--------------", qtAvaliacaoPorUser + 1);
+            printf("\nFILME: %s\n", avUser.titulo);
+            printf("\nUSUARIOS: %s\n", avUser.usuario);
+            printf("\nCOMENTARIO: %s", avUser.comentario);
+            printf("\nNOTA: %d\n: ", avUser.avaliacao);
+
+            qtAvaliacaoPorUser++;
+        }
+    }
+
+    if (qtAvaliacaoPorUser == 0)
+    {
+        printf("\nNão foram encontradas avaliações desse usuario\n");
+    }
+}
+
+void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes)
+{
+
+    fseek(arqavaliacoes, 0, SEEK_SET);
+
+    int qtAvaliacaoPorFilme = 0;
+
+    Avaliar avFilme;
+    while (fread(&avFilme, sizeof(Avaliar), 1, arqavaliacoes) != 1)
+    {
+        if (strcmp(avFilme.usuario, filme) == 0)
+        {
+            printf("--------------AVALIAÇÃO %d--------------", qtAvaliacaoPorFilme + 1);
+            printf("\nFILME: %s\n", avFilme.titulo);
+            printf("\nUSUARIOS: %s\n", avFilme.usuario);
+            printf("\nCOMENTARIO: %s", avFilme.comentario);
+            printf("\nNOTA: %d\n: ", avFilme.avaliacao);
+
+            qtAvaliacaoPorFilme++;
+        }
+    }
+
+    if (qtAvaliacaoPorFilme == 0)
+    {
+        printf("\nNão foram encontradas avaliações desse filmes\n");
+    }
+
+    void exibirFilmesAvaliadosPorUsuario(char user[], FILE *arqavaliacoes)
+    {
+        fseek(arqavaliacoes, 0, SEEK_SET);
+
+        int qtAvaliacaoPorUser = 0;
+
+        Avaliar avUser;
+        while (fread(&avUser, sizeof(Avaliar), 1, arqavaliacoes) != 1)
+        {
+            if (strcmp(avUser.usuario, user) == 0)
+            {
+                printf("--------------AVALIAÇÃO %d--------------", qtAvaliacaoPorUser + 1);
+                printf("\nFILME: %s\n", avUser.titulo);
+                qtAvaliacaoPorUser++;
+            }
+        }
+
+        if (qtAvaliacaoPorUser == 0)
+        {
+            printf("\nNão foram encontradas avaliações desse usuario\n");
+        }
+    }
+}
 
 /*-------------------MODULO DE FUNÇÕES GÊNERICAS-------------------*/
 
