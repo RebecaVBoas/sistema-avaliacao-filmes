@@ -62,6 +62,8 @@ int menuAdmin(int *op);
 void cadastrarFilme(FILE *arqfilme);
 void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacao, char *usuario_logado);
 long contarTotalFilmes(FILE *arqfilme);
+void pioresfilmes(FILE *arqfilme);
+void melhoresfilmes(FILE *arqfilme);
 
 // Funções de Usuários
 void cadastrarUsuario(FILE *arqusuario);
@@ -127,9 +129,12 @@ int main()
                 break;
             case 4:
                 // ver melhores filmes
+                melhoresfilmes(filme);
                 break;
             case 5:
                 // ver piores filmes
+                pioresfilmes(filme);
+
                 break;
             case 6: // saiu
                 system("clear");
@@ -282,7 +287,7 @@ FILE *abrirAvaliacoes()
     avaliacoes = fopen("avaliacoes.dat", "r+w");
 
     {
-        avaliacoes = fopen("avaliacoes .dat", "w+b");
+        avaliacoes = fopen("avaliacoes.dat", "w+b");
 
         if (avaliacoes == NULL)
         {
@@ -357,7 +362,6 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
     }
 
     // Calcula o total de páginas arredondando para cima.
-
     /*
         A expressão (total_filmes + FILMES_POR_PAGINA - 1) garante que,
         mesmo que haja filmes "sobrando" na última página, a divisão inteira
@@ -479,7 +483,7 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
 
                 // Logica para achar o filme no arquivo
                 // O ID 1 está no byte 0. O ID 2 está no byte sizeof(Filmes)...
-                
+
                 long offset_filme = (id_escolhido - 1) * sizeof(Filmes);
 
                 fseek(arqfilme, offset_filme, SEEK_SET);
@@ -587,6 +591,140 @@ long contarTotalFilmes(FILE *arqfilme)
 
     // Garante a divisão correta pelo tamanho do registro
     return tamanho_bytes / sizeof(Filmes);
+}
+
+void pioresfilmes(FILE *arqfilme)
+{
+    Filmes filme_lido;
+    Filmes piores[5];
+    int i, j;
+
+    // 1. Inicializa o vetor com notas altas impossíveis
+
+    for (i = 0; i < 5; i++)
+    {
+        piores[i].avaliacao_media = 100.0;
+        strcpy(piores[i].titulo, "---"); // Limpa o nome visualmente
+    }
+
+    fseek(arqfilme, 0, SEEK_SET); // Volta ao início do arquivo
+
+    // 2. Lê filme por filme
+    while (fread(&filme_lido, sizeof(Filmes), 1, arqfilme) == 1)
+    {
+        // Se a nota do filme lido for MENOR que a do 5º lugar (o menos pior dos piores)
+        if (filme_lido.avaliacao_media < piores[4].avaliacao_media)
+        {
+            // Substitui o último da lista pelo novo filme
+            piores[4] = filme_lido;
+
+            // 3. Ordena o vetor (Bubble Sort) para que o pior nota fique em [0]
+
+            for (i = 0; i < 5; i++)
+            {
+                for (j = i + 1; j < 5; j++)
+                {
+                    if (piores[i].avaliacao_media > piores[j].avaliacao_media)
+                    {
+                        Filmes temp = piores[i];
+                        piores[i] = piores[j];
+                        piores[j] = temp;
+                    }
+                }
+            }
+        }
+    }
+    // 4. Exibição Bonita
+    printf(ORANGE "\n                     ========== TOP 5 PIORES FILMES ===========\n" RESET);
+
+    int encontrou_algum = 0;
+    for (i = 0; i < 5; i++)
+    {
+        // Só imprime se a nota for válida (menor que 100)
+        if (piores[i].avaliacao_media < 100.0)
+        {
+            printf(BLUE "\n                     [%dº Lugar]\n" RESET, i + 1);
+            printf("                     Título: %s\n", piores[i].titulo);
+            printf("                     Média: %.1f\n", piores[i].avaliacao_media);
+            encontrou_algum = 1;
+        }
+    }
+
+    if (!encontrou_algum)
+    {
+        printf("\nNenhum filme cadastrado ou avaliado ainda.\n");
+    }
+
+    printf("\n                     =========================================\n");
+    printf("Pressione ENTER para voltar...");
+    getchar();
+}
+
+void melhoresfilmes(FILE *arqfilme)
+{
+    Filmes filme_lido;
+    Filmes melhores[5];
+    int i, j;
+
+    // 1. Inicializa o vetor com notas altas impossíveis
+
+    for (i = 0; i < 5; i++)
+    {
+        melhores[i].avaliacao_media = 0.0;
+        strcpy(melhores[i].titulo, "---"); // Limpa o nome visualmente
+    }
+
+    fseek(arqfilme, 0, SEEK_SET); // Volta ao início do arquivo
+
+    // 2. Lê filme por filme
+    while (fread(&filme_lido, sizeof(Filmes), 1, arqfilme) == 1)
+    {
+        // Se a nota do filme lido for maior que a do 5º lugar 
+        if (filme_lido.avaliacao_media > melhores[4].avaliacao_media)
+        {
+            // Substitui o último da lista pelo novo filme
+            melhores[4] = filme_lido;
+
+            // 3. Ordena o vetor (Bubble Sort) para que o pior nota fique em [0]
+
+            for (i = 0; i < 5; i++)
+            {
+                for (j = i + 1; j < 5; j++)
+                {
+                    if (melhores[i].avaliacao_media < melhores[j].avaliacao_media)
+                    {
+                        Filmes temp = melhores[i];
+                        melhores[i] = melhores[j];
+                        melhores[j] = temp;
+                    }
+                }
+            }
+        }
+    }
+    // 4. Exibição Bonita
+    printf(ORANGE "\n                     ========== TOP 5 PIORES FILMES ===========\n" RESET);
+
+    int encontrou_algum = 0;
+    for (i = 0; i < 5; i++)
+    {
+        // Só imprime se a nota for válida (menor que 100)
+        if (melhores[i].avaliacao_media < 100.0)
+        {
+            printf(BLUE "\n                     [%dº Lugar]\n" RESET, i + 1);
+            printf("                     Título: %s\n", melhores[i].titulo);
+            printf("                     Média: %.1f\n", melhores[i].avaliacao_media);
+            encontrou_algum = 1;
+        }
+    }
+
+    if (!encontrou_algum)
+    {
+        printf("\nNenhum filme cadastrado ou avaliado ainda.\n");
+    }
+
+    printf("\n                     =========================================\n");
+    printf("Pressione ENTER para voltar...");
+    getchar();
 }
 
 /*-------------------MODULO DE FUNÇÕES DE USUARIOS-------------------*/
