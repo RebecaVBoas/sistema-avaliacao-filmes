@@ -16,5 +16,6 @@ typedef struct
 void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes);
 void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes);
 void exibirTodasAvaliacoes(FILE *avaliacoes);
+void recomendarFilmes(char *usuario_logado, FILE *arqavaliacoes);
 
 #endif

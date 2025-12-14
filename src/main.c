@@ -98,7 +98,12 @@ int main()
 
                 exibirAvaliacoesPorFilme(filmePesquisa, avaliacoes);
                 break;
-            case 8: // saiu
+            case 8:
+                /* 8 - Recomendação k-NN */
+                // Precisamos passar o ponteiro do arquivo de avaliações e o nome do usuário
+                recomendarFilmes(usuerLogado.nome, avaliacoes);
+                break;
+            case 9: // saiu
                 system("clear");
                 // fechando arquivos para salvar
                 printf("\nEncerrando e fechando arquivos...\n");
@@ -189,7 +194,8 @@ int menuPrincipal(int *op)
     printf("                            5 - Ver piores filmes                       \n");
     printf("                            6 - Ver avaliações por usuário                       \n");
     printf("                            7 - Ver avaliações por filmes                       \n");
-    printf("                            8 - Sair                           \n");
+    printf("                            8 - Recomendações (IA k-NN) ✨             \n"); 
+    printf("                            9 - Sair                           \n");
     printf("                            Escolha sua opção: ");
     scanf("%d", op);
     return *op;
@@ -216,64 +222,3 @@ int menuAdmin(int *op)
     return *op;
 }
 
-/*-------------------MODULO DE FUNÇÕES DE ABERTURA DOS ARQUIVOS-------------------*/
-
-FILE *abrirFilme()
-{
-    FILE *filmes;
-
-    filmes = fopen("filmes.dat", "r+b");
-
-    if (filmes == NULL)
-    {
-        filmes = fopen("filmes.dat", "w+b");
-
-        if (filmes == NULL)
-        {
-            printf("ERRO, NÃO FOI POSÍVEL ABRIR O ARQUIVO FILMES");
-            return NULL;
-        }
-    }
-
-    printf("\nARQUIVO FILME ABERTO \n");
-    return filmes;
-}
-
-FILE *abrirUsuarios()
-{
-    FILE *usuarios;
-
-    usuarios = fopen("usuarios.dat", "r+b");
-    if (usuarios == NULL)
-    {
-        usuarios = fopen("usuarios.dat", "w+b");
-
-        if (usuarios == NULL)
-        {
-            printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO USUARIOS.DATA \n");
-            return NULL;
-        }
-    }
-
-    printf("\nARQUIVO USUARIOS.DATA ABERTO\n");
-    return usuarios;
-}
-
-FILE *abrirAvaliacoes()
-{
-    FILE *avaliacoes;
-    avaliacoes = fopen("avaliacoes.dat", "r+b");
-
-    {
-        // avaliacoes = fopen("avaliacoes.dat", "w+b");
-
-        if (avaliacoes == NULL)
-        {
-            printf("\n ERRO NÃO FOI POSSIVEL ABRIR O ARQUIVO AVALIACOES.DATA \n");
-            return NULL;
-        }
-    }
-
-    printf("\nARQUIVO AVALIACOES.DATA ABERTO\n");
-    return avaliacoes;
-}

@@ -10,6 +10,10 @@
 #define RESET "\033[0m"
 
 // --- PROTÓTIPOS ---
+FILE *abrirFilme();
+FILE *abrirUsuarios();
+FILE *abrirAvaliacoes();
 void remover_quebra_linha(char *str);
+
 
 #endif
