@@ -165,11 +165,7 @@ int main()
     }
     else if (strcmp(usuerLogado.nome, "admin") != 0)
     {
-<<<<<<< HEAD
-        // menu principal;
-=======
-        // menuPrincipal;
->>>>>>> ed0301c2c3e8876a06d7d44cc2b2f6f0aac84cdb
+        // menupPrincipal;
 
         while (op != 8)
         {
