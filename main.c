@@ -76,57 +76,10 @@ void imprimirUsuarios(FILE *arqusuario);
 void adicionaravaliação(FILE *arqavaliacoes);
 void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes);
 void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes);
+void exibirTodasAvaliacoes(FILE *avaliacoes);
 
-// Funções Utilitárias
-void remover_quebra_linha(char *str);
-
-void exibirTodasAvaliacoes(FILE *avaliacoes)
-{
-    if (avaliacoes == NULL)
-    {
-        printf("\nERRO: O arquivo de avaliações não está aberto ou é NULL.\n");
-        return;
-    }
-    
-    // 1. Volta para o início do arquivo para garantir que a leitura comece do zero
-    fseek(avaliacoes, 0, SEEK_SET);
-
-    int qtAvaliacaoTotal = 0;
-    Avaliar avAtual;
-
-    printf("\n=======================================================");
-    printf("\n========= EXIBINDO TODAS AS AVALIAÇÕES SALVAS =========");
-    printf("\n=======================================================\n");
-
-    // 2. Loop de leitura: continua enquanto fread conseguir ler 1 struct (retorna 1)
-    while (fread(&avAtual, sizeof(Avaliar), 1, avaliacoes) == 1)
-    {
-        qtAvaliacaoTotal++;
-
-        // 3. Exibição dos dados do registro
-        printf("\n-------------- AVALIAÇÃO %d --------------\n", qtAvaliacaoTotal);
-        printf("FILME:      %s\n", avAtual.titulo);
-        printf("USUÁRIO:    %s\n", avAtual.usuario);
-        printf("NOTA:       %d/5\n", avAtual.avaliacao);
-        printf("COMENTÁRIO: %s\n", avAtual.comentario);
-        printf("-----------------------------------------\n");
-    }
-
-    // 4. Mensagem de resumo
-    if (qtAvaliacaoTotal == 0)
-    {
-        printf("\nO arquivo 'avaliacoes.dat' está vazio ou não foram encontradas avaliações.\n");
-    }
-    else
-    {
-        printf("\n=======================================================");
-        printf("\n%d avaliações exibidas com sucesso.", qtAvaliacaoTotal);
-        printf("\n=======================================================\n");
-    }
-    
-    // É uma boa prática limpar o flag de erro de EOF (fim de arquivo) após a leitura
-    clearerr(avaliacoes); 
-}
+    // Funções Utilitárias
+    void remover_quebra_linha(char *str);
 
 int main()
 {
@@ -146,9 +99,9 @@ int main()
      }
 
     */
-   // imprimirUsuarios(usuarios);
+    // imprimirUsuarios(usuarios);
 
-   exibirTodasAvaliacoes(avaliacoes);
+    exibirTodasAvaliacoes(avaliacoes);
 
     Usuarios usuerLogado = validarLogin(usuarios);
     int op = 0;
@@ -159,11 +112,7 @@ int main()
     // VARIAVEIS CASE 7
     char filmePesquisa[100];
 
-    if (strcmp(usuerLogado.nome, "nullLogin") == 0)
-    {
-        printf("Usuario não encontrado");
-    }
-    else if (strcmp(usuerLogado.nome, "admin") != 0)
+    if (strcmp(usuerLogado.nome, "admin") != 0)
     {
         // menupPrincipal;
 
@@ -203,13 +152,18 @@ int main()
                 fgets(userPesquisa, sizeof(userPesquisa), stdin);
                 remover_quebra_linha(userPesquisa);
 
+                system("clear");
+
                 exibirAvaliacoesPorUsuario(userPesquisa, avaliacoes);
                 break;
             case 7:
+
                 // ver avaliações por filme
                 printf("Informe o nome do filme que deseja pesquisar: ");
                 fgets(filmePesquisa, sizeof(filmePesquisa), stdin);
                 remover_quebra_linha(filmePesquisa);
+
+                system("clear");
 
                 exibirAvaliacoesPorFilme(filmePesquisa, avaliacoes);
                 break;
@@ -233,7 +187,7 @@ int main()
     }
     else
     {
-        while (op != 7)
+        while (op != 5)
         {
             menuAdmin(&op);
             // limpa o buffer para a próxima leitura
@@ -249,12 +203,22 @@ int main()
 
                 break;
             case 2:
-                /* 2 - Estastísticas */
-                break;
-            case 3:
+                // Cadastrar usuario
+                system("clear");
+                cadastrarUsuario(usuarios);
 
                 break;
-            case 7: // saiu
+            case 3:
+                /* 3- Estastísticas */
+                system("clear");
+                exibirTodasAvaliacoes(avaliacoes);
+
+                break;
+            case 4:
+                // Ver usuarios cadastrados
+                imprimirUsuarios(usuarios);
+
+            case 5: // saiu
                 system("clear");
                 // fechando arquivos para salvar
                 printf("\nEncerrando e fechando arquivos...\n");
@@ -313,7 +277,11 @@ int menuAdmin(int *op)
     printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ADMIN----------           \n");
     printf("                            1 - Cadastar novo filme                  \n");
     printf("                            2 - Cadastrar Usuario                  \n");
-    printf("                            3 - Sair                           \n");
+    printf("                            3 - Ver avaliações                 \n");
+    printf("                            4 - Ver usuarios cadastrados                \n");
+    printf("                            5 - Sair                           \n");
+    printf("                            Escolha sua opção: ");
+    scanf("%d", op);
     return *op;
 }
 
@@ -366,7 +334,7 @@ FILE *abrirAvaliacoes()
     avaliacoes = fopen("avaliacoes.dat", "r+b");
 
     {
-        //avaliacoes = fopen("avaliacoes.dat", "w+b");
+        // avaliacoes = fopen("avaliacoes.dat", "w+b");
 
         if (avaliacoes == NULL)
         {
@@ -843,34 +811,71 @@ void cadastrarUsuario(FILE *arqusuario)
 
 Usuarios validarLogin(FILE *arqusuario)
 {
-
     Usuarios arquser;
     Usuarios login;
+    char logarNovamente;
 
-    printf("\n                 ---------- LOGIN ----------           \n");
-
-    printf("                            LOGIN: ");
-    fgets(login.nome, sizeof(login.nome), stdin);
-    remover_quebra_linha(login.nome);
-
-    printf("\n                            SENHA: ");
-    fgets(login.senha, sizeof(login.senha), stdin);
-    remover_quebra_linha(login.senha);
-
-    while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
+    // Loop externo para permitir tentativas de login
+    while (1)
     {
-        if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
+        system("clear");
+        // 1. Reinicia o ponteiro do arquivo para o início a cada tentativa
+        rewind(arqusuario);
+
+        printf("\n                 ---------- LOGIN ----------           \n");
+
+        // 2. Leitura dos dados de login
+        printf("                            LOGIN: ");
+        fgets(login.nome, sizeof(login.nome), stdin);
+        remover_quebra_linha(login.nome);
+
+        printf("\n                            SENHA: ");
+        fgets(login.senha, sizeof(login.senha), stdin);
+        remover_quebra_linha(login.senha);
+        int encontrado = 0;
+
+        // 3. Busca no arquivo
+        while (fread(&arquser, sizeof(arquser), 1, arqusuario) == 1)
         {
-            printf("\nusuario encontrado\n");
-            return arquser;
+            if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
+            {
+                system("clear");
+                encontrado = 1;
+                return arquser; // Sai da função com o usuário logado
+            }
+        }
+
+        // 4. Se o loop de busca terminou e o usuário não foi encontrado
+        if (encontrado == 0)
+        {
+            printf("\nUsuario não encontrado.\n");
+
+            do
+            {
+                printf("\n(s) Nova tentativa de login | (n) Sair\n");
+                printf("Opção: ");
+
+                // Leitura segura de um único caractere
+                if (scanf(" %c", &logarNovamente) != 1)
+                {
+                    // Tratar erro de leitura se necessário
+                }
+                while (getchar() != '\n')
+                    ; // Limpa o buffer de entrada
+
+                logarNovamente = tolower(logarNovamente); // Padroniza para 's' ou 'n'
+
+            } while (logarNovamente != 's' && logarNovamente != 'n');
+
+            if (logarNovamente == 'n')
+            {
+                system("clear");
+                printf("Saindo do programa...\n");
+                exit(1);
+            }
+            // Se for 's', o loop 'while(1)' reinicia no início da função
         }
     }
-
-    Usuarios nullLogin;
-    strcpy(nullLogin.nome, "nullLogin");
-
-    printf("\nUsuario não encontrado\n");
-    return nullLogin;
 }
 
 void atualizarSenha(FILE *arqusuario, Usuarios user)
@@ -924,6 +929,7 @@ void imprimirUsuarios(FILE *arqusuario)
 
 void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes)
 {
+    system("clear");
 
     fseek(arqavaliacoes, 0, SEEK_SET);
 
@@ -952,6 +958,7 @@ void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes)
 
 void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes)
 {
+    system("clear");
 
     fseek(arqavaliacoes, 0, SEEK_SET);
 
@@ -976,6 +983,54 @@ void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes)
     {
         printf("\nNão foram encontradas avaliações desse filmes\n");
     }
+}
+
+void exibirTodasAvaliacoes(FILE *avaliacoes)
+{
+    if (avaliacoes == NULL)
+    {
+        printf("\nERRO: O arquivo de avaliações não está aberto ou é NULL.\n");
+        return;
+    }
+
+    // 1. Volta para o início do arquivo para garantir que a leitura comece do zero
+    fseek(avaliacoes, 0, SEEK_SET);
+
+    int qtAvaliacaoTotal = 0;
+    Avaliar avAtual;
+
+    printf("\n=======================================================");
+    printf("\n========= EXIBINDO TODAS AS AVALIAÇÕES SALVAS =========");
+    printf("\n=======================================================\n");
+
+    // 2. Loop de leitura: continua enquanto fread conseguir ler 1 struct (retorna 1)
+    while (fread(&avAtual, sizeof(Avaliar), 1, avaliacoes) == 1)
+    {
+        qtAvaliacaoTotal++;
+
+        // 3. Exibição dos dados do registro
+        printf("\n-------------- AVALIAÇÃO %d --------------\n", qtAvaliacaoTotal);
+        printf("FILME:      %s\n", avAtual.titulo);
+        printf("USUÁRIO:    %s\n", avAtual.usuario);
+        printf("NOTA:       %d/5\n", avAtual.avaliacao);
+        printf("COMENTÁRIO: %s\n", avAtual.comentario);
+        printf("-----------------------------------------\n");
+    }
+
+    // 4. Mensagem de resumo
+    if (qtAvaliacaoTotal == 0)
+    {
+        printf("\nO arquivo 'avaliacoes.dat' está vazio ou não foram encontradas avaliações.\n");
+    }
+    else
+    {
+        printf("\n=======================================================");
+        printf("\n%d avaliações exibidas com sucesso.", qtAvaliacaoTotal);
+        printf("\n=======================================================\n");
+    }
+
+    // É uma boa prática limpar o flag de erro de EOF (fim de arquivo) após a leitura
+    clearerr(avaliacoes);
 }
 
 /*-------------------MODULO DE FUNÇÕES GÊNERICAS-------------------*/
