@@ -80,6 +80,54 @@ void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes);
 // Funções Utilitárias
 void remover_quebra_linha(char *str);
 
+void exibirTodasAvaliacoes(FILE *avaliacoes)
+{
+    if (avaliacoes == NULL)
+    {
+        printf("\nERRO: O arquivo de avaliações não está aberto ou é NULL.\n");
+        return;
+    }
+    
+    // 1. Volta para o início do arquivo para garantir que a leitura comece do zero
+    fseek(avaliacoes, 0, SEEK_SET);
+
+    int qtAvaliacaoTotal = 0;
+    Avaliar avAtual;
+
+    printf("\n=======================================================");
+    printf("\n========= EXIBINDO TODAS AS AVALIAÇÕES SALVAS =========");
+    printf("\n=======================================================\n");
+
+    // 2. Loop de leitura: continua enquanto fread conseguir ler 1 struct (retorna 1)
+    while (fread(&avAtual, sizeof(Avaliar), 1, avaliacoes) == 1)
+    {
+        qtAvaliacaoTotal++;
+
+        // 3. Exibição dos dados do registro
+        printf("\n-------------- AVALIAÇÃO %d --------------\n", qtAvaliacaoTotal);
+        printf("FILME:      %s\n", avAtual.titulo);
+        printf("USUÁRIO:    %s\n", avAtual.usuario);
+        printf("NOTA:       %d/5\n", avAtual.avaliacao);
+        printf("COMENTÁRIO: %s\n", avAtual.comentario);
+        printf("-----------------------------------------\n");
+    }
+
+    // 4. Mensagem de resumo
+    if (qtAvaliacaoTotal == 0)
+    {
+        printf("\nO arquivo 'avaliacoes.dat' está vazio ou não foram encontradas avaliações.\n");
+    }
+    else
+    {
+        printf("\n=======================================================");
+        printf("\n%d avaliações exibidas com sucesso.", qtAvaliacaoTotal);
+        printf("\n=======================================================\n");
+    }
+    
+    // É uma boa prática limpar o flag de erro de EOF (fim de arquivo) após a leitura
+    clearerr(avaliacoes); 
+}
+
 int main()
 {
 
@@ -98,6 +146,9 @@ int main()
      }
 
     */
+   // imprimirUsuarios(usuarios);
+
+   exibirTodasAvaliacoes(avaliacoes);
 
     Usuarios usuerLogado = validarLogin(usuarios);
     int op = 0;
@@ -114,7 +165,11 @@ int main()
     }
     else if (strcmp(usuerLogado.nome, "admin") != 0)
     {
+<<<<<<< HEAD
         // menu principal;
+=======
+        // menuPrincipal;
+>>>>>>> ed0301c2c3e8876a06d7d44cc2b2f6f0aac84cdb
 
         while (op != 8)
         {
@@ -315,7 +370,7 @@ FILE *abrirAvaliacoes()
     avaliacoes = fopen("avaliacoes.dat", "r+b");
 
     {
-        avaliacoes = fopen("avaliacoes.dat", "w+b");
+        //avaliacoes = fopen("avaliacoes.dat", "w+b");
 
         if (avaliacoes == NULL)
         {
@@ -580,8 +635,6 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                 fseek(arqavaliacoes, 0, SEEK_END); // Vai para o fim
                 fwrite(&nova_avaliacao, sizeof(Avaliar), 1, arqavaliacoes);
                 fflush(arqavaliacoes); // força a gravar logo
-
-                size_t escrito = fwrite(&nova_avaliacao, sizeof(Avaliar), 1, arqavaliacoes);
 
                 printf(GREEN "\nAvaliação registrada com sucesso!\n" RESET);
                 printf("Pressione ENTER para continuar...");
