@@ -77,16 +77,16 @@ Usuarios validarLogin(FILE *arqusuario)
         printf(ORANGE "                                     ⬤ " RESET);
         printf(GREEN "⬤ " RESET);
         printf(BLUE "⬤ " RESET "\n");
-        printf("\n                 ---------- LOGIN ----------           \n");
+        printf("\n                          ---------- LOGIN ----------           \n");
 
         // 1. Coleta de credenciais
-        printf("                            LOGIN: ");
+        printf("                                     LOGIN: ");
         // Se estiver em Linux/macOS, pode ser omitido, mas é mais seguro.
         fflush(stdin);
         fgets(login.nome, sizeof(login.nome), stdin);
         remover_quebra_linha(login.nome);
 
-        printf("\n                            SENHA: ");
+        printf("                                     SENHA: ");
         fgets(login.senha, sizeof(login.senha), stdin);
         remover_quebra_linha(login.senha);
 

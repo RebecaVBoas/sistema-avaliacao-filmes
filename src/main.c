@@ -186,15 +186,15 @@ int menuPrincipal(int *op)
     printf(BLUE "⬤ " RESET "\n");
 
     //  28 espaços
-    printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------           \n");
-    printf("                            1 - Ver/Avaliar filmes                     \n");
-    printf("                            2 - Estastísticas                  \n");
-    printf("                            3 - Ver Filmes avaliados                         \n");
-    printf("                            4 - Ver melhores filmes                           \n");
-    printf("                            5 - Ver piores filmes                       \n");
-    printf("                            6 - Ver avaliações por usuário                       \n");
-    printf("                            7 - Ver avaliações por filmes                       \n");
-    printf("                            8 - Recomendações (IA k-NN) ✨             \n"); 
+    printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------\n");
+    printf("                            1 - Ver/Avaliar filmes\n");
+    printf("                            2 - Estastísticas\n");
+    printf("                            3 - Ver Filmes avaliados\n");
+    printf("                            4 - Ver melhores filmes\n");
+    printf("                            5 - Ver piores filmes\n");
+    printf("                            6 - Ver avaliações por usuário");
+    printf("\n                            7 - Ver avaliações por filmes\n");
+    printf("                            8 - Recomendações (IA k-NN) ✨\n"); 
     printf("                            9 - Sair                           \n");
     printf("                            Escolha sua opção: ");
     scanf("%d", op);

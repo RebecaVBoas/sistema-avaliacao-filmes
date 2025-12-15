@@ -273,7 +273,7 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
         }
 
     } while (opcao_nav != 'S');
-
+    system("clear");
     printf("\nRetornando ao menu principal...\n");
 }
 
@@ -306,6 +306,7 @@ long contarTotalFilmes(FILE *arqfilme)
 
 void pioresfilmes(FILE *arqfilme)
 {
+    system("clear");
     Filmes filme_lido;
     Filmes piores[5];
     int i, j;
@@ -376,7 +377,7 @@ void melhoresfilmes(FILE *arqfilme)
     Filmes filme_lido;
     Filmes melhores[5];
     int i, j;
-
+    system("clear");
     // 1. Inicializa o vetor com notas altas impossíveis
 
     for (i = 0; i < 5; i++)
