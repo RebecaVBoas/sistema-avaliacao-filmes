@@ -187,11 +187,12 @@ void recomendarFilmes(char *usuario_logado, FILE *arqavaliacoes) {
     Avaliar avLeitura;
     
     system("clear"); // Use "cls" se estiver no Windows
-    printf("CALCULANDO RECOMENDACOES BASEADAS EM SEU GOSTO...\n");
+    printf("               CALCULANDO RECOMENDACOES BASEADAS EM SEU GOSTO...\n");
 
     // ---------------------------------------------------------
     // PASSO 1: Carregar as notas do usuário logado (IGUAL AO ANTERIOR)
     // ---------------------------------------------------------
+
     rewind(arqavaliacoes); 
     while(fread(&avLeitura, sizeof(Avaliar), 1, arqavaliacoes) == 1) {
         if(strcmp(avLeitura.usuario, usuario_logado) == 0) {
@@ -255,7 +256,8 @@ void recomendarFilmes(char *usuario_logado, FILE *arqavaliacoes) {
     if (!encontrouVizinho) {
         printf("\n                    [INFO] Nao encontramos usuarios com gostos similares.\n");
     } else {
-        printf("\n                    Encontramos um perfil compativel: %s (Distancia: %.2f)\n", melhorVizinho, menorDistancia);
+        printf("\n               Encontramos um perfil compativel: "); 
+        printf(ORANGE"%s (Distancia: %.2f)\n" RESET, melhorVizinho, menorDistancia);
         
         // 3.1 COLETAR FILMES CANDIDATOS
         rewind(arqavaliacoes);
@@ -298,19 +300,18 @@ void recomendarFilmes(char *usuario_logado, FILE *arqavaliacoes) {
         if(qtdCandidatos == 0) {
             printf("\nO seu 'vizinho' nao tem filmes novos bons para te indicar.\n");
         } else {
-            printf("\n                    --- TOP 5 FILMES RECOMENDADOS PARA VOCE ---\n");
+            printf(GREEN"\n               --- TOP 5 FILMES RECOMENDADOS PARA VOCE ---\n" RESET);
             
             // Define limite: o menor valor entre 5 e a quantidade que achamos
             int limite = (qtdCandidatos < 5) ? qtdCandidatos : 5;
             
             for(int i = 0; i < limite; i++) {
-                printf("                    %d. %s (Nota dele: %d)\n", i+1, candidatos[i].titulo, candidatos[i].nota);
+                printf("               %d. %s (Nota dele: %d)\n", i+1, candidatos[i].titulo, candidatos[i].nota);
             }
         }
     }
     
-    printf("\n                 -----------------------------------------------------\n");
-    printf("                    Pressione ENTER 1 ou 2 vezes para voltar ao menu...");
+    printf("\n               -----------------------------------------------------\n");
+    printf("               Pressione ENTER para voltar ao menu...");
     getchar();
-    getchar(); // As vezes precisa de dois getchar para segurar a tela no C
 }

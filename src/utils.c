@@ -60,7 +60,7 @@ FILE *abrirAvaliacoes()
         }
     }
 
-    printf("\nARQUIVO AVALIACOES.DATA ABERTO\n");
+    //printf("\nARQUIVO AVALIACOES.DATA ABERTO\n");
     return avaliacoes;
 }
 

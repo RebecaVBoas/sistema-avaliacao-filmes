@@ -192,7 +192,7 @@ int menuPrincipal(int *op)
     printf("                            4 - Ver piores filmes\n");
     printf("                            5 - Ver avaliações por usuário");
     printf("\n                            6 - Ver avaliações por filmes\n");
-    printf("                            7 - Recomendações (IA k-NN) ✨\n");
+    printf("                            7 - Recomendações ✨\n");
     printf("                            8 - Sair                           \n");
     printf("                            Escolha sua opção: ");
     scanf("%d", op);
