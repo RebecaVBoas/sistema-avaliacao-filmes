@@ -8,6 +8,10 @@
 #include "avaliacoes.h"
 #include "utils.h"
 
+//===============================================
+//              UTILIZAR TERMINAL 80 de largura
+//===============================================
+
 /* modo de uso
     printf(ORANGE "Cor 1 (#ff8000)\n" RESET);
     printf(GREEN  "Cor 2 (#00e054)\n" RESET);
@@ -33,7 +37,7 @@ int main()
     FILE *avaliacoes = abrirAvaliacoes();
 
     long contarTotalFilmes(FILE * arqfilme);
-    
+
     Usuarios usuerLogado = validarLogin(usuarios);
     int op = 0;
 
@@ -63,21 +67,18 @@ int main()
 
                 break;
             case 2:
-                /* 2 - Estastísticas */
+                // Ver filmes avaliados
+                exibirAvaliacoesPorUsuario(usuerLogado.nome, avaliacoes);
                 break;
             case 3:
-                // Ver filmes avaliados
-                break;
-            case 4:
                 // ver melhores filmes
                 melhoresfilmes(filme);
                 break;
-            case 5:
+            case 4:
                 // ver piores filmes
                 pioresfilmes(filme);
-
                 break;
-            case 6:
+            case 5:
                 // ver avaliações por usuario
                 printf("Informe o nome do usuário que deseja pesquisar: ");
                 fgets(userPesquisa, sizeof(userPesquisa), stdin);
@@ -87,10 +88,9 @@ int main()
 
                 exibirAvaliacoesPorUsuario(userPesquisa, avaliacoes);
                 break;
-            case 7:
-
+            case 6:
                 // ver avaliações por filme
-                printf("Informe o nome do filme que deseja pesquisar: ");
+                printf("\nInforme o nome do filme que deseja pesquisar [ nome (ano) ]: ");
                 fgets(filmePesquisa, sizeof(filmePesquisa), stdin);
                 remover_quebra_linha(filmePesquisa);
 
@@ -98,12 +98,12 @@ int main()
 
                 exibirAvaliacoesPorFilme(filmePesquisa, avaliacoes);
                 break;
-            case 8:
+            case 7:
                 /* 8 - Recomendação k-NN */
                 // Precisamos passar o ponteiro do arquivo de avaliações e o nome do usuário
                 recomendarFilmes(usuerLogado.nome, avaliacoes);
                 break;
-            case 9: // saiu
+            case 8: // saiu
                 system("clear");
                 // fechando arquivos para salvar
                 printf("\nEncerrando e fechando arquivos...\n");
@@ -114,9 +114,8 @@ int main()
                 printf("Saindo do programa...\n");
                 exit(0);
                 break;
-
             default:
-                printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 7!! \n \n");
+                printf("\n \n                            [ERRO] - Digite algo valido, entre 1 e 8!! \n \n");
                 break;
             }
         }
@@ -181,21 +180,20 @@ int menuPrincipal(int *op)
     // system("clear"); utilizar cls no windows
 
     // 38 espaços
-    printf(ORANGE "                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
+    printf(ORANGE "\n                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
     printf(GREEN "⬤ " RESET);
     printf(BLUE "⬤ " RESET "\n");
 
     //  28 espaços
     printf("                 ---------- BEM VINDO AO LETTERBOXD LP1 ----------\n");
     printf("                            1 - Ver/Avaliar filmes\n");
-    printf("                            2 - Estastísticas\n");
-    printf("                            3 - Ver Filmes avaliados\n");
-    printf("                            4 - Ver melhores filmes\n");
-    printf("                            5 - Ver piores filmes\n");
-    printf("                            6 - Ver avaliações por usuário");
-    printf("\n                            7 - Ver avaliações por filmes\n");
-    printf("                            8 - Recomendações (IA k-NN) ✨\n"); 
-    printf("                            9 - Sair                           \n");
+    printf("                            2 - Ver Filmes avaliados\n");
+    printf("                            3 - Ver melhores filmes\n");
+    printf("                            4 - Ver piores filmes\n");
+    printf("                            5 - Ver avaliações por usuário");
+    printf("\n                            6 - Ver avaliações por filmes\n");
+    printf("                            7 - Recomendações (IA k-NN) ✨\n");
+    printf("                            8 - Sair                           \n");
     printf("                            Escolha sua opção: ");
     scanf("%d", op);
     return *op;
@@ -221,4 +219,3 @@ int menuAdmin(int *op)
     scanf("%d", op);
     return *op;
 }
-

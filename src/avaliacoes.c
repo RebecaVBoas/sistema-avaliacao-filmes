@@ -30,11 +30,32 @@ void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes)
     {
         if (strcmp(avUser.usuario, user) == 0)
         {
-            printf("                   ----------AVALIAÇÃO %d----------    ", qtAvaliacaoPorUser + 1);
+            printf("\n                   ---------------- AVALIAÇÃO %d ----------------", qtAvaliacaoPorUser + 1);
             printf("\n                             FILME: %s\n", avUser.titulo);
             printf("\n                             USUARIOS: %s\n", avUser.usuario);
             printf("\n                             COMENTARIO: %s", avUser.comentario);
-            printf("\n                             NOTA: %d\n", avUser.avaliacao);
+            switch (avUser.avaliacao)
+            {
+            case 1:
+                
+                printf("\n                             NOTA: %d ⭐\n", avUser.avaliacao);
+                break;
+            case 2:
+                printf("\n                             NOTA: %d ⭐⭐\n", avUser.avaliacao);
+                break;
+            case 3:
+                printf("\n                             NOTA: %d ⭐⭐⭐\n", avUser.avaliacao);
+                break;
+            case 4:
+                printf("\n                             NOTA: %d ⭐⭐⭐⭐\n", avUser.avaliacao);
+                break;
+            case 5:
+                printf("\n                             NOTA: %d ⭐⭐⭐⭐⭐\n", avUser.avaliacao);
+                break;           
+            default:
+                break;
+            }
+            
 
             qtAvaliacaoPorUser++;
         }
@@ -44,6 +65,9 @@ void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes)
     {
         printf("\nNão foram encontradas avaliações desse usuario\n");
     }
+    printf(ORANGE"\n                     =========================================\n" RESET);
+    printf("Pressione ENTER para voltar...");
+    getchar();
 }
 
 void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes)
@@ -59,11 +83,31 @@ void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes)
     {
         if (strcmp(avFilme.titulo, filme) == 0)
         {
-            printf("--------------AVALIAÇÃO %d--------------", qtAvaliacaoPorFilme + 1);
-            printf("\nFILME: %s\n", avFilme.titulo);
-            printf("\nUSUARIOS: %s\n", avFilme.usuario);
-            printf("\nCOMENTARIO: %s", avFilme.comentario);
-            printf("\nNOTA: %d\n", avFilme.avaliacao);
+        printf("\n                   ---------------- AVALIAÇÃO %d ----------------", qtAvaliacaoPorFilme + 1);
+            printf("\n                             FILME: %s\n", avFilme.titulo);
+            printf("\n                             USUARIOS: %s\n", avFilme.usuario);
+            printf("\n                             COMENTARIO: %s", avFilme.comentario);
+            switch (avFilme.avaliacao)
+            {
+            case 1:
+                
+                printf("\n                             NOTA: %d ⭐\n", avFilme.avaliacao);
+                break;
+            case 2:
+                printf("\n                             NOTA: %d ⭐⭐\n", avFilme.avaliacao);
+                break;
+            case 3:
+                printf("\n                             NOTA: %d ⭐⭐⭐\n", avFilme.avaliacao);
+                break;
+            case 4:
+                printf("\n                             NOTA: %d ⭐⭐⭐⭐\n", avFilme.avaliacao);
+                break;
+            case 5:
+                printf("\n                             NOTA: %d ⭐⭐⭐⭐⭐\n", avFilme.avaliacao);
+                break;           
+            default:
+                break;
+            }
 
             qtAvaliacaoPorFilme++;
         }
@@ -209,9 +253,9 @@ void recomendarFilmes(char *usuario_logado, FILE *arqavaliacoes) {
     // ---------------------------------------------------------
     
     if (!encontrouVizinho) {
-        printf("\n[INFO] Nao encontramos usuarios com gostos similares.\n");
+        printf("\n                    [INFO] Nao encontramos usuarios com gostos similares.\n");
     } else {
-        printf("\nEncontramos um perfil compativel: %s (Distancia: %.2f)\n", melhorVizinho, menorDistancia);
+        printf("\n                    Encontramos um perfil compativel: %s (Distancia: %.2f)\n", melhorVizinho, menorDistancia);
         
         // 3.1 COLETAR FILMES CANDIDATOS
         rewind(arqavaliacoes);
@@ -254,19 +298,19 @@ void recomendarFilmes(char *usuario_logado, FILE *arqavaliacoes) {
         if(qtdCandidatos == 0) {
             printf("\nO seu 'vizinho' nao tem filmes novos bons para te indicar.\n");
         } else {
-            printf("\n--- TOP 5 FILMES RECOMENDADOS PARA VOCE ---\n");
+            printf("\n                    --- TOP 5 FILMES RECOMENDADOS PARA VOCE ---\n");
             
             // Define limite: o menor valor entre 5 e a quantidade que achamos
             int limite = (qtdCandidatos < 5) ? qtdCandidatos : 5;
             
             for(int i = 0; i < limite; i++) {
-                printf("%d. %s (Nota dele: %d)\n", i+1, candidatos[i].titulo, candidatos[i].nota);
+                printf("                    %d. %s (Nota dele: %d)\n", i+1, candidatos[i].titulo, candidatos[i].nota);
             }
         }
     }
     
-    printf("\n------------------------------------------------\n");
-    printf("Pressione ENTER para voltar ao menu...");
+    printf("\n                 -----------------------------------------------------\n");
+    printf("                    Pressione ENTER 1 ou 2 vezes para voltar ao menu...");
     getchar();
     getchar(); // As vezes precisa de dois getchar para segurar a tela no C
 }

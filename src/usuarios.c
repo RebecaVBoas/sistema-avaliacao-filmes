@@ -73,20 +73,20 @@ Usuarios validarLogin(FILE *arqusuario)
     while (1)
     {
         system("clear"); // Limpa a tela a cada nova tentativa
-
-        printf(ORANGE "                                     ⬤ " RESET);
+        // 38 espaços
+        printf(ORANGE "\n                                      ⬤ " RESET); // ⬤ é Unicode, que é um padrão universal que define números (códigos) para representar todos os caracteres que existem
         printf(GREEN "⬤ " RESET);
         printf(BLUE "⬤ " RESET "\n");
-        printf("\n                          ---------- LOGIN ----------           \n");
+        printf("\n                            ---------- LOGIN ----------           \n");
 
         // 1. Coleta de credenciais
-        printf("                                     LOGIN: ");
+        printf("                                       LOGIN: ");
         // Se estiver em Linux/macOS, pode ser omitido, mas é mais seguro.
         fflush(stdin);
         fgets(login.nome, sizeof(login.nome), stdin);
         remover_quebra_linha(login.nome);
 
-        printf("                                     SENHA: ");
+        printf("                                       SENHA: ");
         fgets(login.senha, sizeof(login.senha), stdin);
         remover_quebra_linha(login.senha);
 
@@ -98,23 +98,22 @@ Usuarios validarLogin(FILE *arqusuario)
             // Compara Nome E Senha
             if ((strcmp(arquser.nome, login.nome) == 0) && (strcmp(arquser.senha, login.senha) == 0))
             {
-                printf(GREEN "\nLogin realizado com sucesso!\n" RESET);
+                printf(GREEN "\n                            Login realizado com sucesso!\n" RESET);
                 return arquser; // Sai da função retornando o usuário logado
             }
         }
 
         // 3. Se a busca falhou: Oferecer nova tentativa ou sair
-        printf(ORANGE "\nUsuário ou senha incorretos.\n" RESET);
+        printf(ORANGE "\n                            Usuário ou senha incorretos.\n" RESET);
 
         do
         {
-            printf("\n(s) Nova tentativa de login | (n) Sair do programa\n");
-            printf("Opção: ");
+            printf("\n             (s) Nova tentativa de login | (n) Sair do programa\n");
+            printf("                            Opção: ");
 
             // Leitura de um único caractere e limpeza do buffer
-            if (scanf(" %c", &opcao_menu) != 1 )
+            if (scanf(" %c", &opcao_menu) != 1)
             {
-               
             }
             while (getchar() != '\n')
                 ; // Limpa o buffer de entrada

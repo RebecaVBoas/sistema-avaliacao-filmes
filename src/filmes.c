@@ -138,7 +138,7 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
             else
             {
                 printf(ORANGE "\n                                [INFO] - Você está na última página.\n" RESET);
-                printf("Aperte ENTER para continuar...");
+                printf("                     Aperte ENTER para continuar...");
                 getchar(); // espera o usuário pressionar ENTER
             }
         }
@@ -151,7 +151,7 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
             else
             {
                 printf(ORANGE "\n                                [INFO] - Você está na primeira página.\n" RESET);
-                printf("Aperte ENTER para continuar...");
+                printf("                     Aperte ENTER para continuar...");
                 getchar(); // espera o usuário pressionar ENTER
             }
         }
@@ -170,7 +170,7 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
             else if (nova_pagina < 1 || nova_pagina > total_paginas)
             {
                 printf(ORANGE "\n                                [ERRO] - Número de página inválido.\n" RESET);
-                printf("Aperte ENTER para continuar...");
+                printf("                     Aperte ENTER para continuar...");
                 getchar(); // espera o usuário pressionar ENTER
             }
         }
@@ -262,7 +262,7 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                 fflush(arqavaliacoes); // força a gravar logo
 
                 printf(GREEN "\nAvaliação registrada com sucesso!\n" RESET);
-                printf("Pressione ENTER para continuar...");
+                printf("                     Pressione ENTER para continuar...");
                 getchar();
             }
             else
@@ -368,7 +368,7 @@ void pioresfilmes(FILE *arqfilme)
     }
 
     printf("\n                     =========================================\n");
-    printf("Pressione ENTER para voltar...");
+    printf("                     Pressione ENTER para voltar...");
     getchar();
 }
 
@@ -435,6 +435,6 @@ void melhoresfilmes(FILE *arqfilme)
     }
 
     printf("\n                     =========================================\n");
-    printf("Pressione ENTER para voltar...");
+    printf("                     Pressione ENTER para voltar...");
     getchar();
 }
