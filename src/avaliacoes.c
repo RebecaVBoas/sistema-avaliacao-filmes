@@ -30,11 +30,11 @@ void exibirAvaliacoesPorUsuario(char user[], FILE *arqavaliacoes)
     {
         if (strcmp(avUser.usuario, user) == 0)
         {
-            printf("--------------AVALIAÇÃO %d--------------", qtAvaliacaoPorUser + 1);
-            printf("\nFILME: %s\n", avUser.titulo);
-            printf("\nUSUARIOS: %s\n", avUser.usuario);
-            printf("\nCOMENTARIO: %s", avUser.comentario);
-            printf("\nNOTA: %d\n", avUser.avaliacao);
+            printf("                   ----------AVALIAÇÃO %d----------    ", qtAvaliacaoPorUser + 1);
+            printf("\n                             FILME: %s\n", avUser.titulo);
+            printf("\n                             USUARIOS: %s\n", avUser.usuario);
+            printf("\n                             COMENTARIO: %s", avUser.comentario);
+            printf("\n                             NOTA: %d\n", avUser.avaliacao);
 
             qtAvaliacaoPorUser++;
         }
@@ -99,7 +99,7 @@ void exibirTodasAvaliacoes(FILE *avaliacoes)
         qtAvaliacaoTotal++;
 
         // 3. Exibição dos dados do registro
-        printf("\n-------------- AVALIAÇÃO %d --------------\n", qtAvaliacaoTotal);
+        printf("\n               -------------- AVALIAÇÃO %d --------------\n", qtAvaliacaoTotal);
         printf("FILME:      %s\n", avAtual.titulo);
         printf("USUÁRIO:    %s\n", avAtual.usuario);
         printf("NOTA:       %d/5\n", avAtual.avaliacao);
