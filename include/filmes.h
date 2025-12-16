@@ -20,5 +20,6 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacao, char *usuario_loga
 long contarTotalFilmes(FILE *arqfilme);
 void pioresfilmes(FILE *arqfilme);
 void melhoresfilmes(FILE *arqfilme);
+int buscarFilmePorTitulo(FILE *arqfilme, char *titulo_busca);
 
 #endif
