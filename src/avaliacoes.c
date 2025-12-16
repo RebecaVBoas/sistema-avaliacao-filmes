@@ -77,11 +77,18 @@ void exibirAvaliacoesPorFilme(char filme[], FILE *arqavaliacoes)
     fseek(arqavaliacoes, 0, SEEK_SET);
 
     int qtAvaliacaoPorFilme = 0;
+    char filme_temp[100];
+
+    strupr(filme);
 
     Avaliar avFilme;
     while (fread(&avFilme, sizeof(Avaliar), 1, arqavaliacoes) == 1)
     {
-        if (strcmp(avFilme.titulo, filme) == 0)
+        strcpy(filme_temp, avFilme.titulo);
+        strupr(filme_temp);
+        filme_temp[strcspn(filme_temp, " (")] = '\0'; // Remove o ano
+        
+        if (strcmp(filme_temp, filme) == 0)
         {
         printf("\n                   ---------------- AVALIAÇÃO %d ----------------", qtAvaliacaoPorFilme + 1);
             printf("\n                             FILME: %s\n", avFilme.titulo);
