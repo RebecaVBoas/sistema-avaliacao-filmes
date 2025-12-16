@@ -23,13 +23,33 @@ void cadastrarFilme(FILE *arqfilme)
     printf(BLUE "⬤ " RESET "\n");
     printf("\n                 ---------- CADASTRANDO NOVO FILME ----------           \n");
 
-    printf("\n                            Informe o título do filme: ");
-    fgets(filme.titulo, sizeof(filme.titulo), stdin);
-    remover_quebra_linha(filme.titulo);
 
-    printf("\n                            Adcione o resumo: ");
-    fgets(filme.resumo, sizeof(filme.resumo), stdin);
-    remover_quebra_linha(filme.resumo);
+    // Validação para título não vazio
+    do {
+        printf("\n                            Informe o título do filme: ");
+        fgets(filme.titulo, sizeof(filme.titulo), stdin);
+        remover_quebra_linha(filme.titulo);
+        if (strlen(filme.titulo) == 0) {
+            printf("O título não pode ser vazio.\n");
+        }
+
+        int existe = buscarFilmePorTitulo(arqfilme, filme.titulo);
+        if (existe) {
+            printf("Um filme com esse título já está cadastrado. Tente novamente com outro título.\n");
+            filme.titulo[0] = '\0'; // zera o título para continuar o loop
+        }
+
+    } while (strlen(filme.titulo) == 0);
+
+    // Validação para resumo não vazio
+    do {
+        printf("\n                            Adicione o resumo: ");
+        fgets(filme.resumo, sizeof(filme.resumo), stdin);
+        remover_quebra_linha(filme.resumo);
+        if (strlen(filme.resumo) == 0) {
+            printf("O resumo não pode ser vazio.\n");
+        }
+    } while (strlen(filme.resumo) == 0);
 
     /*PENDENTE: IMPLEMENTAR NAS FUNÇÕES ENVOLVIDAS O CÁLCULO DESSES
     VALORES AUTOMATICAMENTE */
@@ -199,25 +219,52 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                 fseek(arqfilme, offset_filme, SEEK_SET);
                 fread(&filme_edit, sizeof(Filmes), 1, arqfilme);
 
+                // Verifica se já existe avaliação desse usuário para esse filme
+                rewind(arqavaliacoes);
+                long pos_avaliacao = -1;
+                int encontrou = 0;
+                while (fread(&leitura_temp, sizeof(Avaliar), 1, arqavaliacoes) == 1) {
+                    if (strcmp(leitura_temp.usuario, usuario_logado) == 0 && strcmp(leitura_temp.titulo, filme_edit.titulo) == 0) {
+                        encontrou = 1;
+                        pos_avaliacao = ftell(arqavaliacoes) - sizeof(Avaliar);
+                        break;
+                    }
+                }
+
+                if (encontrou) {
+                    printf(ORANGE "\nVocê já avaliou este filme. Deseja substituir a avaliação? (S/N): " RESET);
+                    char resp;
+                    scanf(" %c", &resp);
+                    while (getchar() != '\n');
+                    resp = toupper(resp);
+                    if (resp != 'S') {
+                        printf("Operação cancelada.\n");
+                        break;
+                    }
+                }
+
                 printf(BLUE "\n--- Avaliando: %s ---\n" RESET, filme_edit.titulo);
 
                 // 2. PEDIR A NOTA E COMENTÁRIO
                 int nota_temp;
+                char buffer[16];
 
-                do
-                {
+                do {
                     printf("Nota (0 a 5[⭐⭐⭐⭐⭐]): ");
-                    scanf("%d", &nota_temp);
-                    while (getchar() != '\n')
-                        ;
+                    if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+                        printf("Entrada inválida. Tente novamente.\n");
+                        nota_temp = -1;
+                    } else if (sscanf(buffer, "%d", &nota_temp) != 1) {
+                        printf("Entrada inválida. Tente novamente.\n");
+                        nota_temp = -1;
+                    }
                 } while (nota_temp < 0 || nota_temp > 5);
 
                 do
                 {
                     printf("Você quer adicionar um comentario? (S) -> sim || (N) -> nao\n");
                     scanf("%c", &coment);
-                    while (getchar() != '\n')
-                        ;
+                    while (getchar() != '\n')                      ;
                     coment = toupper(coment);
                 } while (coment != 'S' && coment != 'N');
 
@@ -233,14 +280,16 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                     strcpy(nova_avaliacao.comentario, "Sem comentário");
                 }
 
-                // 3. RECALCULAR A MEDIA DOS FILMES AUTOMATICAMENTE
-
-                filme_edit.soma_notas += nota_temp; // somatorio de notas totais
-                filme_edit.qtdAvalia++;             // quantidade de avaliação
-
-                // Proteção contra divisão por zero e cálculo da média
-                if (filme_edit.qtdAvalia > 0)
-                {
+                // Atualiza média do filme
+                if (!encontrou) {
+                    filme_edit.soma_notas += nota_temp;
+                    filme_edit.qtdAvalia++;
+                } else {
+                    // Se for substituição, não altera qtdAvalia, apenas ajusta soma_notas
+                    // Para isso, precisamos saber a nota anterior
+                    filme_edit.soma_notas = filme_edit.soma_notas - leitura_temp.avaliacao + nota_temp;
+                }
+                if (filme_edit.qtdAvalia > 0) {
                     filme_edit.avaliacao_media = (float)filme_edit.soma_notas / filme_edit.qtdAvalia;
                 }
 
@@ -257,9 +306,16 @@ void listar_avaliarFilmes(FILE *arqfilme, FILE *arqavaliacoes, char *usuario_log
                 strcpy(nova_avaliacao.usuario, usuario_logado);
                 nova_avaliacao.avaliacao = nota_temp;
 
-                fseek(arqavaliacoes, 0, SEEK_END); // Vai para o fim
-                fwrite(&nova_avaliacao, sizeof(Avaliar), 1, arqavaliacoes);
-                fflush(arqavaliacoes); // força a gravar logo
+                if (encontrou && pos_avaliacao != -1) {
+                    // Sobrescreve avaliação existente
+                    fseek(arqavaliacoes, pos_avaliacao, SEEK_SET);
+                    fwrite(&nova_avaliacao, sizeof(Avaliar), 1, arqavaliacoes);
+                } else {
+                    // Adiciona nova avaliação
+                    fseek(arqavaliacoes, 0, SEEK_END);
+                    fwrite(&nova_avaliacao, sizeof(Avaliar), 1, arqavaliacoes);
+                }
+                fflush(arqavaliacoes);
 
                 printf(GREEN "\nAvaliação registrada com sucesso!\n" RESET);
                 printf("                     Pressione ENTER para continuar...");
@@ -433,6 +489,51 @@ void melhoresfilmes(FILE *arqfilme)
     {
         printf("\nNenhum filme cadastrado ou avaliado ainda.\n");
     }
+
+    printf("\n                     =========================================\n");
+    printf("                     Pressione ENTER para voltar...");
+    getchar();
+}
+
+int buscarFilmePorTitulo(FILE *arqfilme, char *titulo_busca)
+{
+    Filmes filme_lido;
+    int encontrado = 0;
+    char filme_temp[100];
+
+    fseek(arqfilme, 0, SEEK_SET); // Volta ao início do arquivo
+
+    printf(ORANGE "\n                     ========== RESULTADOS DA BUSCA ===========\n" RESET);
+
+    // Lê filme por filme
+    while (fread(&filme_lido, sizeof(Filmes), 1, arqfilme) == 1)
+    {
+        strcpy(filme_temp, filme_lido.titulo);
+        
+        filme_temp[strcspn(filme_temp, " (")] = '\0'; // Remove o ano
+        strupr(filme_temp);
+        remover_quebra_linha(filme_temp);
+
+        remover_quebra_linha(titulo_busca);
+        strupr(titulo_busca);
+        
+        // Verifica se o título contém a string buscada (case insensitive)
+        if (strcmp(filme_temp, titulo_busca) == 0)
+        {
+            // printf(BLUE "\n                     Título: %s\n" RESET, filme_lido.titulo);
+            // printf("                     Resumo: %s\n", filme_lido.resumo);
+            // printf("                     Avaliação Média: %.1f\n", filme_lido.avaliacao_media);
+            // printf("------------------------------------------------------------\n");
+            encontrado = 1;
+        }
+    }
+
+    // if (!encontrado)
+    // {
+    //     printf("\nNenhum filme encontrado com o título contendo: %s\n", titulo_busca);
+    // }
+
+    return encontrado;
 
     printf("\n                     =========================================\n");
     printf("                     Pressione ENTER para voltar...");
